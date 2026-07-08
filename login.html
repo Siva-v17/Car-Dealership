@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — Stackly Motors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+  --ink:        #0B0D10;
+  --ink-2:      #14171C;
+  --ink-3:      #1C2027;
+  --line:       #262B33;
+  --paper:      #ECE9E2;
+  --paper-dim:  #9BA0AA;
+  --ignition:   #FF5A1F;
+  --ignition-2: #FF8A50;
+  --volt:       #00E0C6;
+  --volt-dim:   #0A3A36;
+  --danger:     #FF4D5E;
+  --ok:         #3DDC84;
+
+  --f-display: 'Rajdhani', 'Arial Narrow', sans-serif;
+  --f-body:    'Inter', -apple-system, sans-serif;
+  --f-mono:    'JetBrains Mono', monospace;
+
+  --radius: 10px;
+  --ease: cubic-bezier(.22,1,.36,1);
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+body{
+  margin:0;
+  background:var(--ink);
+  color:var(--paper);
+  font-family:var(--f-body);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+img{ max-width:100%; display:block; }
+a{ color:inherit; text-decoration:none; }
+button{ font-family:inherit; cursor:pointer; }
+input{ font-family:inherit; }
+::selection{ background:var(--ignition); color:var(--ink); }
+
+h2{ font-family:var(--f-display); font-weight:700; text-transform:uppercase; letter-spacing:0.01em; line-height:1.05; margin:0; }
+h3{ font-family:var(--f-display); font-weight:700; text-transform:uppercase; letter-spacing:0.01em; margin:0; }
+p{ margin:0; color:var(--paper-dim); }
+
+.eyebrow{
+  font-family:var(--f-mono); text-transform:uppercase; letter-spacing:0.22em;
+  font-size:0.72rem; color:var(--ignition); display:flex; align-items:center; gap:10px; margin-bottom:18px;
+}
+.eyebrow::before{ content:''; width:26px; height:1px; background:var(--ignition); display:inline-block; }
+.eyebrow.volt{ color:var(--volt); }
+.eyebrow.volt::before{ background:var(--volt); }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  font-family:var(--f-display); font-weight:700; text-transform:uppercase; letter-spacing:0.06em;
+  font-size:0.92rem; padding:16px 30px; border-radius:4px; border:1px solid transparent;
+  transition:transform .35s var(--ease), background .35s var(--ease), border-color .35s var(--ease), color .35s var(--ease);
+  white-space:nowrap; width:100%;
+}
+.btn-primary{ background:var(--ignition); color:var(--ink); }
+.btn-primary:hover{ background:var(--ignition-2); transform:translateY(-3px); }
+.btn-primary:disabled{ opacity:0.55; cursor:not-allowed; transform:none; }
+.btn-primary.role-admin{ background:var(--volt); }
+.btn-primary.role-admin:hover{ background:#3aeada; }
+.btn-primary .spinner{ display:none; width:16px; height:16px; border:2px solid rgba(11,13,16,0.3); border-top-color:var(--ink); border-radius:50%; animation:spin 0.7s linear infinite; }
+.btn-primary.loading .spinner{ display:inline-block; }
+.btn-primary.loading .btn-label{ opacity:0.7; }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+
+/* ---------- Tab groups (role + auth mode) ---------- */
+.tab-group{ display:flex; gap:6px; background:var(--ink-2); padding:6px; border-radius:6px; }
+.tab-group button{ flex:1; background:none; border:none; padding:12px; color:var(--paper-dim); font-family:var(--f-mono); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; border-radius:4px; transition:all .3s; }
+.role-tabs{ margin-bottom:14px; }
+.role-tabs button.active{ background:var(--ignition); color:var(--ink); }
+.role-tabs button[data-role="admin"].active{ background:var(--volt); color:var(--ink); }
+.auth-tabs{ margin-bottom:30px; }
+.auth-tabs button.active{ background:var(--ink-3); color:var(--paper); box-shadow:inset 0 0 0 1px var(--line); }
+
+/* ---------- Auth split ---------- */
+.auth-wrap{ min-height:100vh; display:grid; grid-template-columns:1fr 1fr; }
+.auth-visual{ position:relative; overflow:hidden; display:flex; align-items:center; padding:0 60px; }
+.auth-visual img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:opacity .4s var(--ease); }
+.auth-visual::after{ content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(11,13,16,0.35), rgba(11,13,16,0.75)); }
+.auth-visual .caption{ position:relative; z-index:2; max-width:400px; }
+.nav-logo{ font-family:var(--f-display); font-weight:700; font-size:1.4rem; letter-spacing:0.03em; text-transform:uppercase; display:flex; align-items:center; gap:8px;}
+.nav-logo span{ color:var(--ignition); }
+
+.auth-form-side{ display:flex; align-items:center; justify-content:center; padding:60px; }
+.auth-box{ width:100%; max-width:420px; }
+
+.panel{ display:none; }
+.panel.active{ display:block; }
+
+.form-field{ margin-bottom:20px; }
+.form-field label{ display:block; font-family:var(--f-mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--paper-dim); margin-bottom:8px; }
+.form-field .input-wrap{ position:relative; }
+.form-field input{
+  width:100%; background:var(--ink); border:1px solid var(--line); border-radius:4px; padding:14px 16px; color:var(--paper);
+  font-size:0.95rem; transition:border-color .3s;
+}
+.form-field input:focus{ outline:none; border-color:var(--ignition); }
+.form-field input.error{ border-color:var(--danger); }
+.form-field .err-msg{ display:none; font-family:var(--f-mono); font-size:0.68rem; color:var(--danger); margin-top:8px; text-transform:uppercase; letter-spacing:0.04em; }
+.form-field .err-msg.show{ display:block; }
+.pw-toggle{ position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--paper-dim); padding:4px; display:flex; }
+.pw-toggle:hover{ color:var(--paper); }
+.pw-toggle svg{ width:18px; height:18px; }
+
+.checkbox-row{ display:flex; align-items:center; gap:10px; font-size:0.85rem; color:var(--paper-dim); }
+.checkbox-row input{ accent-color:var(--ignition); width:16px; height:16px; }
+.checkbox-row a{ color:var(--ignition); }
+
+.divider-or{ display:flex; align-items:center; gap:14px; margin:26px 0; color:var(--paper-dim); font-family:var(--f-mono); font-size:0.68rem; text-transform:uppercase; }
+.divider-or::before, .divider-or::after{ content:''; flex:1; height:1px; background:var(--line); }
+.social-auth{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.social-auth button{ background:var(--ink-2); border:1px solid var(--line); border-radius:4px; padding:13px; color:var(--paper); font-family:var(--f-body); font-size:0.85rem; display:flex; align-items:center; justify-content:center; gap:8px; transition:border-color .3s; }
+.social-auth button:hover{ border-color:var(--paper); }
+
+.form-alert{ display:none; align-items:flex-start; gap:10px; background:rgba(255,77,94,0.1); border:1px solid rgba(255,77,94,0.3); color:var(--danger); padding:12px 14px; border-radius:6px; font-size:0.85rem; margin-bottom:20px; }
+.form-alert.show{ display:flex; }
+.form-alert svg{ width:16px; height:16px; flex-shrink:0; margin-top:2px; }
+
+/* ---------- Modal ---------- */
+.modal-overlay{ position:fixed; inset:0; background:rgba(11,13,16,0.78); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:2000; padding:20px; }
+.modal-overlay.show{ display:flex; }
+.modal-box{ background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius); padding:40px 32px; max-width:380px; width:100%; text-align:center; animation:modalIn .3s var(--ease); }
+@keyframes modalIn{ from{ opacity:0; transform:translateY(14px) scale(0.97); } to{ opacity:1; transform:translateY(0) scale(1); } }
+.modal-icon{ width:56px; height:56px; border-radius:50%; background:var(--volt-dim); color:var(--volt); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; }
+.modal-icon svg{ width:26px; height:26px; }
+.modal-icon.warn{ background:rgba(255,90,31,0.12); color:var(--ignition); }
+.modal-box h3{ font-size:1.25rem; margin-bottom:10px; }
+.modal-box p{ font-size:0.9rem; margin-bottom:26px; }
+
+@media (max-width: 1080px){
+  .auth-wrap{ grid-template-columns:1fr; }
+  .auth-visual{ display:none; }
+}
+@media (max-width: 480px){
+  .auth-form-side{ padding:32px 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="auth-wrap">
+  <div class="auth-visual">
+    <img id="visualImg" src="https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=1400&q=80" alt="Luxury car at dusk">
+    <div class="caption">
+      <a href="index.html" class="nav-logo"><img src="./assets/stackly-removebg-preview.png" alt="" style="height: 60px; width: 120px;"></a>
+      <br><br>
+      <h2 id="visualHeading" style="font-size:2rem;">Your account,<br>your garage</h2>
+      <p id="visualSub" style="margin-top:14px; color:var(--paper-dim);">Track saved cars, test drive bookings, financing offers and service history — all in one dashboard.</p>
+    </div>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-box">
+
+      <!-- Role selector: User / Admin -->
+      <div class="tab-group role-tabs" id="roleTabs">
+        <button type="button" class="active" data-role="user">User</button>
+        <button type="button" data-role="admin">Admin</button>
+      </div>
+
+      <!-- Sign In / Create Account selector -->
+      <div class="tab-group auth-tabs" id="authTabs">
+        <button type="button" class="active" data-panel="signin">Sign In</button>
+        <button type="button" data-panel="signup">Create Account</button>
+      </div>
+
+      <!-- ============ SIGN IN PANEL ============ -->
+      <div class="panel active" id="signinPanel">
+        <div class="eyebrow" id="signinEyebrow">Welcome Back</div>
+        <h2 id="signinHeading" style="font-size:1.9rem; margin-bottom:8px;">Sign in to Stackly</h2>
+        <p style="margin-bottom:30px;" id="signinSub">Access your dashboard, saved cars and bookings.</p>
+
+        <div class="form-alert" id="signinAlert">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span id="signinAlertText">Invalid email or password.</span>
+        </div>
+
+        <form id="loginForm" novalidate>
+          <div class="form-field">
+            <label for="email">Email Address</label>
+            <div class="input-wrap">
+              <input type="email" id="email" name="email" placeholder="you@email.com" autocomplete="email">
+            </div>
+            <div class="err-msg" id="emailErr">Please enter a valid email address.</div>
+          </div>
+
+          <div class="form-field">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <input type="password" id="password" name="password" placeholder="••••••••••" autocomplete="current-password">
+              <button type="button" class="pw-toggle" data-target="password" aria-label="Show password"></button>
+            </div>
+            <div class="err-msg" id="passwordErr">Password must be at least 6 characters.</div>
+          </div>
+
+          <div class="checkbox-row" style="justify-content:space-between; margin-bottom:24px;">
+            <span style="display:flex; align-items:center; gap:8px;">
+              <input type="checkbox" id="remember"><label for="remember" style="margin:0;">Remember me</label>
+            </span>
+            <a href="#" id="forgotLink">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="submitBtn">
+            <span class="spinner"></span>
+            <span class="btn-label" id="submitBtnLabel">Sign In</span>
+          </button>
+        </form>
+
+        <div class="divider-or">Or continue with</div>
+        <div class="social-auth">
+          <button type="button">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.51h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.54-5.17 3.54-8.87z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3c-1.08.72-2.45 1.15-4.05 1.15-3.11 0-5.75-2.1-6.69-4.93H1.3v3.09A12 12 0 0 0 12 24z"/>
+              <path fill="#FBBC05" d="M5.31 14.31A7.2 7.2 0 0 1 4.93 12c0-.8.14-1.58.38-2.31V6.6H1.3A12 12 0 0 0 0 12c0 1.94.47 3.77 1.3 5.4z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.94 1.19 15.24 0 12 0A12 12 0 0 0 1.3 6.6l4.01 3.09C6.25 6.85 8.89 4.75 12 4.75z"/>
+            </svg>
+            Google
+          </button>
+          <button type="button">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+              <path d="M16.36 1.43c0 1.14-.42 2.2-1.12 3.02-.85 1-2.25 1.75-3.45 1.65-.14-1.09.4-2.24 1.1-3.02.85-.96 2.35-1.68 3.47-1.65zM20.5 17.34c-.5 1.15-.74 1.66-1.38 2.68-.9 1.44-2.16 3.24-3.73 3.25-1.4.02-1.76-.9-3.65-.9-1.9 0-2.3.88-3.7.92-1.57.05-2.77-1.55-3.67-2.98-2-3.15-2.55-6.85-1.13-8.83.99-1.4 2.58-2.28 4.06-2.28 1.5 0 2.44.9 3.68.9 1.2 0 1.93-.9 3.68-.9 1.32 0 2.72.72 3.71 1.96-3.26 1.79-2.73 6.44 1.13 8.18z"/>
+            </svg>
+            Apple
+          </button>
+        </div>
+
+        <p style="text-align:center; margin-top:30px; font-size:0.88rem;"><a href="index.html" id="goToSignup" style="color:var(--ignition);">Back to Home</a></p>
+      </div>
+
+      <!-- ============ SIGN UP PANEL ============ -->
+      <div class="panel" id="signupPanel">
+        <div class="eyebrow" id="signupEyebrow">Join Stackly</div>
+        <h2 style="font-size:1.9rem; margin-bottom:8px;" id="signupHeading">Create your account</h2>
+        <p style="margin-bottom:30px;" id="signupSub">Set up access to your personal dashboard.</p>
+
+        <div class="form-alert" id="signupAlert">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span id="signupAlertText">Something went wrong.</span>
+        </div>
+
+        <form id="signupForm" novalidate>
+          <div class="form-field">
+            <label for="fullName">Full Name</label>
+            <div class="input-wrap">
+              <input type="text" id="fullName" name="fullName" placeholder="Alex Rivera" autocomplete="name">
+            </div>
+            <div class="err-msg" id="fullNameErr">Please enter your full name.</div>
+          </div>
+
+          <div class="form-field">
+            <label for="signupEmail">Email Address</label>
+            <div class="input-wrap">
+              <input type="email" id="signupEmail" name="signupEmail" placeholder="you@email.com" autocomplete="email">
+            </div>
+            <div class="err-msg" id="signupEmailErr">Please enter a valid email address.</div>
+          </div>
+
+          <div class="form-field">
+            <label for="signupPassword">Password</label>
+            <div class="input-wrap">
+              <input type="password" id="signupPassword" name="signupPassword" placeholder="••••••••••" autocomplete="new-password">
+              <button type="button" class="pw-toggle" data-target="signupPassword" aria-label="Show password"></button>
+            </div>
+            <div class="err-msg" id="signupPasswordErr">Password must be at least 6 characters.</div>
+          </div>
+
+          <div class="form-field">
+            <label for="confirmPassword">Confirm Password</label>
+            <div class="input-wrap">
+              <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••••" autocomplete="new-password">
+              <button type="button" class="pw-toggle" data-target="confirmPassword" aria-label="Show password"></button>
+            </div>
+            <div class="err-msg" id="confirmPasswordErr">Passwords do not match.</div>
+          </div>
+
+          <div class="checkbox-row" style="margin-bottom:24px;">
+            <input type="checkbox" id="terms">
+            <label for="terms" style="margin:0;">I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a></label>
+          </div>
+          <div class="err-msg" id="termsErr" style="margin-top:-14px; margin-bottom:16px;">Please accept the terms to continue.</div>
+
+          <button type="submit" class="btn btn-primary" id="signupBtn">
+            <span class="spinner"></span>
+            <span class="btn-label" id="signupBtnLabel">Create Account</span>
+          </button>
+        </form>
+
+        <p style="text-align:center; margin-top:30px; font-size:0.88rem;">Already have an account? <a href="#" id="goToSignin" style="color:var(--ignition);">Sign in</a></p>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL ============ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-icon" id="modalIcon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+    </div>
+    <h3 id="modalTitle">Success</h3>
+    <p id="modalMessage">Done.</p>
+    <button class="btn btn-primary" id="modalBtn">OK</button>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  /* ---------- Element refs ---------- */
+  const roleTabs = document.getElementById('roleTabs');
+  const authTabs = document.getElementById('authTabs');
+  const signinPanel = document.getElementById('signinPanel');
+  const signupPanel = document.getElementById('signupPanel');
+
+  const loginForm = document.getElementById('loginForm');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const emailErr = document.getElementById('emailErr');
+  const passwordErr = document.getElementById('passwordErr');
+  const signinAlert = document.getElementById('signinAlert');
+  const signinAlertText = document.getElementById('signinAlertText');
+  const submitBtn = document.getElementById('submitBtn');
+  const submitBtnLabel = document.getElementById('submitBtnLabel');
+
+  const signupForm = document.getElementById('signupForm');
+  const fullNameInput = document.getElementById('fullName');
+  const signupEmailInput = document.getElementById('signupEmail');
+  const signupPasswordInput = document.getElementById('signupPassword');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
+  const termsInput = document.getElementById('terms');
+  const fullNameErr = document.getElementById('fullNameErr');
+  const signupEmailErr = document.getElementById('signupEmailErr');
+  const signupPasswordErr = document.getElementById('signupPasswordErr');
+  const confirmPasswordErr = document.getElementById('confirmPasswordErr');
+  const termsErr = document.getElementById('termsErr');
+  const signupAlert = document.getElementById('signupAlert');
+  const signupAlertText = document.getElementById('signupAlertText');
+  const signupBtn = document.getElementById('signupBtn');
+  const signupBtnLabel = document.getElementById('signupBtnLabel');
+
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalMessage = document.getElementById('modalMessage');
+  const modalIcon = document.getElementById('modalIcon');
+  const modalBtn = document.getElementById('modalBtn');
+
+  let currentRole = 'user'; // 'user' | 'admin'
+  let modalOnClose = null;
+
+  const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+  const MAIL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z" opacity="0"></path><path d="M22 6l-10 7L2 6"></path><rect x="2" y="4" width="20" height="16" rx="2"></rect></svg>';
+  const EYE_OPEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+  const EYE_CLOSED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06"></path><path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-3.22 4.44"></path><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+
+  /* ---------- Demo "database" ---------- */
+  const DEMO_ACCOUNTS = {
+    user:  { email: 'demo@stacklymotors.com',  password: 'password123', name: 'Alex Rivera' },
+    admin: { email: 'admin@stacklymotors.com', password: 'admin123',    name: 'Morgan Lee' }
+  };
+
+  function getStoredAccounts(){
+    try { return JSON.parse(localStorage.getItem('stackly_accounts') || '[]'); }
+    catch(e){ return []; }
+  }
+  function saveStoredAccount(acc){
+    const list = getStoredAccounts();
+    list.push(acc);
+    localStorage.setItem('stackly_accounts', JSON.stringify(list));
+  }
+
+  /* ---------- Eye toggles (works for any .pw-toggle) ---------- */
+  document.querySelectorAll('.pw-toggle').forEach(btn => {
+    btn.innerHTML = EYE_OPEN;
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.getAttribute('data-target'));
+      const isPw = target.type === 'password';
+      target.type = isPw ? 'text' : 'password';
+      btn.innerHTML = isPw ? EYE_CLOSED : EYE_OPEN;
+      btn.setAttribute('aria-label', isPw ? 'Hide password' : 'Show password');
+    });
+  });
+
+  /* ---------- Modal helpers ---------- */
+  function openModal({ title, message, variant = 'ok', onClose = null }){
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    modalIcon.className = 'modal-icon' + (variant === 'warn' ? ' warn' : '');
+    modalIcon.innerHTML = variant === 'warn' ? MAIL_SVG : CHECK_SVG;
+    modalOnClose = onClose;
+    modalOverlay.classList.add('show');
+  }
+  function closeModal(){
+    modalOverlay.classList.remove('show');
+    if (typeof modalOnClose === 'function') { const cb = modalOnClose; modalOnClose = null; cb(); }
+  }
+  modalBtn.addEventListener('click', closeModal);
+  modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+
+  /* ---------- Role tabs (User / Admin) ---------- */
+  roleTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    roleTabs.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentRole = btn.getAttribute('data-role');
+    applyRoleTheme();
+    clearSigninAlert();
+    clearSignupAlert();
+  });
+
+  function applyRoleTheme(){
+    const isAdmin = currentRole === 'admin';
+    submitBtn.classList.toggle('role-admin', isAdmin);
+    signupBtn.classList.toggle('role-admin', isAdmin);
+
+    document.getElementById('signinEyebrow').textContent = isAdmin ? 'Admin Access' : 'Welcome Back';
+    document.getElementById('signinEyebrow').className = 'eyebrow' + (isAdmin ? ' volt' : '');
+    document.getElementById('signinHeading').textContent = isAdmin ? 'Sign in to Admin Portal' : 'Sign in to Stackly';
+    document.getElementById('signinSub').textContent = isAdmin ? 'Manage inventory, dealers and site content.' : 'Access your dashboard, saved cars and bookings.';
+    submitBtnLabel.textContent = isAdmin ? 'Sign In as Admin' : 'Sign In';
+
+    document.getElementById('signupEyebrow').textContent = isAdmin ? 'New Admin' : 'Join Stackly';
+    document.getElementById('signupEyebrow').className = 'eyebrow' + (isAdmin ? ' volt' : '');
+    document.getElementById('signupHeading').textContent = isAdmin ? 'Create an admin account' : 'Create your account';
+    document.getElementById('signupSub').textContent = isAdmin ? 'Set up staff access to the admin portal.' : 'Set up access to your personal dashboard.';
+    signupBtnLabel.textContent = isAdmin ? 'Create Admin Account' : 'Create Account';
+
+    document.getElementById('visualHeading').innerHTML = isAdmin ? 'Run the<br>dealership' : 'Your account,<br>your garage';
+    document.getElementById('visualSub').textContent = isAdmin ? 'Manage listings, dealers and analytics from one admin portal.' : 'Track saved cars, test drive bookings, financing offers and service history — all in one dashboard.';
+  }
+
+  /* ---------- Sign In / Create Account tabs ---------- */
+  authTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    switchAuthPanel(btn.getAttribute('data-panel'));
+  });
+  function switchAuthPanel(panel){
+    authTabs.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.getAttribute('data-panel') === panel));
+    signinPanel.classList.toggle('active', panel === 'signin');
+    signupPanel.classList.toggle('active', panel === 'signup');
+  }
+  document.getElementById('goToSignup').addEventListener('click', (e) => { e.preventDefault(); switchAuthPanel('signup'); });
+  document.getElementById('goToSignin').addEventListener('click', (e) => { e.preventDefault(); switchAuthPanel('signin'); });
+
+  /* ---------- Forgot password ---------- */
+  document.getElementById('forgotLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    const email = emailInput.value.trim();
+    openModal({
+      title: 'Check your inbox',
+      message: email
+        ? `If an account exists for ${email}, we've sent password reset instructions.`
+        : `Enter your email above first, then we'll send you password reset instructions.`,
+      variant: 'warn'
+    });
+  });
+
+  /* ---------- Validation helpers ---------- */
+  function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+  function setFieldError(input, errEl, show){ input.classList.toggle('error', show); errEl.classList.toggle('show', show); }
+  function clearSigninAlert(){ signinAlert.classList.remove('show'); }
+  function clearSignupAlert(){ signupAlert.classList.remove('show'); }
+  function showSigninAlert(msg){ signinAlertText.textContent = msg; signinAlert.classList.add('show'); }
+  function showSignupAlert(msg){ signupAlertText.textContent = msg; signupAlert.classList.add('show'); }
+
+  emailInput.addEventListener('input', () => { setFieldError(emailInput, emailErr, false); clearSigninAlert(); });
+  passwordInput.addEventListener('input', () => { setFieldError(passwordInput, passwordErr, false); clearSigninAlert(); });
+
+  [fullNameInput, signupEmailInput, signupPasswordInput, confirmPasswordInput].forEach(inp => {
+    inp.addEventListener('input', () => clearSignupAlert());
+  });
+
+  /* ---------- Sign In submit ---------- */
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    clearSigninAlert();
+
+    const emailVal = emailInput.value.trim();
+    const pwVal = passwordInput.value;
+    let valid = true;
+
+    if (!isValidEmail(emailVal)) { setFieldError(emailInput, emailErr, true); valid = false; }
+    else setFieldError(emailInput, emailErr, false);
+
+    if (pwVal.length < 6) { setFieldError(passwordInput, passwordErr, true); valid = false; }
+    else setFieldError(passwordInput, passwordErr, false);
+
+    if (!valid) return;
+
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+
+    setTimeout(() => {
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+
+      const demo = DEMO_ACCOUNTS[currentRole];
+      let matchedName = null;
+
+      if (emailVal === demo.email && pwVal === demo.password) {
+        matchedName = demo.name;
+      } else {
+        const stored = getStoredAccounts().find(a => a.role === currentRole && a.email === emailVal && a.password === pwVal);
+        if (stored) matchedName = stored.name;
+      }
+
+      if (matchedName) {
+        if (document.getElementById('remember').checked) {
+          localStorage.setItem('stackly_remember_email', emailVal);
+        }
+        const key = currentRole === 'admin' ? 'stackly_admin_name' : 'stackly_user_name';
+        localStorage.setItem(key, matchedName);
+
+        const dest = currentRole === 'admin' ? 'admin-dashboard.html' : 'user-dashboard.html';
+        window.location.href = dest + '?name=' + encodeURIComponent(matchedName);
+      } else {
+        showSigninAlert('Invalid email or password for this account type.');
+      }
+    }, 900);
+  });
+
+  /* ---------- Sign Up submit ---------- */
+  signupForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    clearSignupAlert();
+
+    const nameVal = fullNameInput.value.trim();
+    const emailVal = signupEmailInput.value.trim();
+    const pwVal = signupPasswordInput.value;
+    const confirmVal = confirmPasswordInput.value;
+    const termsOk = termsInput.checked;
+    let valid = true;
+
+    if (nameVal.length < 2) { setFieldError(fullNameInput, fullNameErr, true); valid = false; }
+    else setFieldError(fullNameInput, fullNameErr, false);
+
+    if (!isValidEmail(emailVal)) { setFieldError(signupEmailInput, signupEmailErr, true); valid = false; }
+    else setFieldError(signupEmailInput, signupEmailErr, false);
+
+    if (pwVal.length < 6) { setFieldError(signupPasswordInput, signupPasswordErr, true); valid = false; }
+    else setFieldError(signupPasswordInput, signupPasswordErr, false);
+
+    if (confirmVal !== pwVal || confirmVal.length < 6) { setFieldError(confirmPasswordInput, confirmPasswordErr, true); valid = false; }
+    else setFieldError(confirmPasswordInput, confirmPasswordErr, false);
+
+    termsErr.classList.toggle('show', !termsOk);
+    if (!termsOk) valid = false;
+
+    if (!valid) return;
+
+    const existing = getStoredAccounts().find(a => a.role === currentRole && a.email === emailVal);
+    const demo = DEMO_ACCOUNTS[currentRole];
+    if (existing || emailVal === demo.email) {
+      showSignupAlert('An account with this email already exists for this role.');
+      return;
+    }
+
+    signupBtn.classList.add('loading');
+    signupBtn.disabled = true;
+
+    setTimeout(() => {
+      signupBtn.classList.remove('loading');
+      signupBtn.disabled = false;
+
+      saveStoredAccount({ name: nameVal, email: emailVal, password: pwVal, role: currentRole });
+
+      openModal({
+        title: 'Account created',
+        message: `Welcome, ${nameVal}! Your ${currentRole} account is ready — please sign in to continue.`,
+        variant: 'ok',
+        onClose: () => {
+          signupForm.reset();
+          switchAuthPanel('signin');
+          emailInput.value = emailVal;
+          passwordInput.value = '';
+          passwordInput.focus();
+        }
+      });
+    }, 900);
+  });
+
+  /* ---------- Pre-fill remembered email ---------- */
+  const remembered = localStorage.getItem('stackly_remember_email');
+  if (remembered) {
+    emailInput.value = remembered;
+    document.getElementById('remember').checked = true;
+  }
+
+  applyRoleTheme();
+})();
+</script>
+</body>
+</html>

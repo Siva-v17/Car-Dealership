@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Dashboard — Stackly Motors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="dash">
+  <aside class="dash-sidebar">
+    <div class="dash-logo">STACKLY<span>.</span>GARAGE</div>
+    <div class="dash-nav-group">
+      <h5>My Account</h5>
+      <a href="#" class="active"><i class="fa-solid fa-gauge-high"></i> Overview</a>
+      <a href="#"><i class="fa-solid fa-heart"></i> Saved Cars</a>
+      <a href="#"><i class="fa-solid fa-car-side"></i> Test Drives</a>
+    </div>
+    <div class="dash-nav-group">
+      <h5>Ownership</h5>
+      <a href="#"><i class="fa-solid fa-file-invoice-dollar"></i> Financing</a>
+      <a href="#"><i class="fa-solid fa-screwdriver-wrench"></i> Service History</a>
+      <a href="#"><i class="fa-solid fa-arrows-rotate"></i> Trade-In</a>
+    </div>
+    <div class="dash-nav-group">
+      <h5>Account</h5>
+      <a href="#"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="#"><i class="fa-solid fa-bell"></i> Notifications</a>
+      <a href="index.html"><i class="fa-solid fa-right-from-bracket"></i> Back to Site</a>
+    </div>
+    <div class="dash-user">
+      <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80" alt="User avatar">
+      <div><b>Arjun Prakash</b><span>Member since 2024</span></div>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div>
+        <h2 style="text-transform:none; letter-spacing:0; font-size:1.6rem;">Welcome back, Arjun</h2>
+        <p class="mono" style="margin-top:4px; font-size:0.7rem;">TUESDAY, JULY 7, 2026</p>
+      </div>
+      <div class="dash-topbar-actions">
+        <div class="dash-search"><i class="fa-solid fa-magnifying-glass" style="color:var(--paper-dim);"></i><input type="text" placeholder="Search saved cars..."></div>
+        <button class="icon-btn"><i class="fa-solid fa-bell"></i><span class="dot"></span></button>
+        <a href="cars.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i>&nbsp; Browse Cars</a>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="top"><div class="ic"><i class="fa-solid fa-heart"></i></div></div>
+        <b data-count="7">0</b>
+        <p>Saved Vehicles</p>
+      </div>
+      <div class="kpi-card">
+        <div class="top"><div class="ic"><i class="fa-solid fa-calendar-check"></i></div></div>
+        <b data-count="2">0</b>
+        <p>Upcoming Test Drives</p>
+      </div>
+      <div class="kpi-card">
+        <div class="top"><div class="ic"><i class="fa-solid fa-file-invoice-dollar"></i></div></div>
+        <b data-count="1">0</b>
+        <p>Active Financing Offer</p>
+      </div>
+      <div class="kpi-card">
+        <div class="top"><div class="ic"><i class="fa-solid fa-screwdriver-wrench"></i></div></div>
+        <b data-count="3">0</b>
+        <p>Service Records</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h3>Upcoming Test Drive</h3><span class="pill blue">Confirmed</span></div>
+      <div class="grid-2" style="align-items:center; gap:24px;">
+        <div style="border-radius:var(--radius); overflow:hidden;"><img src="https://images.unsplash.com/photo-1517994112540-009c47ea476b?auto=format&fit=crop&w=800&q=80" alt="Helix EV Crossover" style="width:100%; height:180px; object-fit:cover;"></div>
+        <div>
+          <h3 style="text-transform:none; letter-spacing:0; font-size:1.3rem;">Helix EV Crossover</h3>
+          <p style="margin-top:8px; font-size:0.9rem;">Saturday, July 11 · 11:00 AM<br>Stackly Motors — Salem Central</p>
+          <div style="display:flex; gap:12px; margin-top:18px;">
+            <button class="btn btn-ghost btn-sm">Reschedule</button>
+            <button class="btn btn-primary btn-sm">Get Directions</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head" style="margin:44px 0 28px;">
+      <div><div class="eyebrow">My Garage</div><h2 style="font-size:1.6rem;">Saved vehicles</h2></div>
+      <a href="cars.html" class="btn btn-ghost btn-sm">Browse More</a>
+    </div>
+    <div class="grid-3" style="margin-bottom:50px;">
+      <div class="car-card"><span class="tag">Saved</span><button class="fav" style="background:var(--ignition); color:var(--ink);"><i class="fa-solid fa-heart"></i></button>
+        <div class="media"><img src="https://images.unsplash.com/photo-1517994112540-009c47ea476b?auto=format&fit=crop&w=1000&q=80" alt="Helix EV Crossover"></div>
+        <div class="body"><h3>Helix EV Crossover</h3><p class="mono">2026 · 0 KM</p>
+          <div class="foot"><div class="price"><span>Starting at</span>₹61.2L</div><a href="#" class="btn btn-ghost btn-sm">View</a></div>
+        </div>
+      </div>
+      <div class="car-card"><span class="tag">Saved</span><button class="fav" style="background:var(--ignition); color:var(--ink);"><i class="fa-solid fa-heart"></i></button>
+        <div class="media"><img src="https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1000&q=80" alt="Velocity GT Sedan"></div>
+        <div class="body"><h3>Velocity GT Sedan</h3><p class="mono">2024 · 6,200 KM</p>
+          <div class="foot"><div class="price"><span>Starting at</span>₹48.9L</div><a href="#" class="btn btn-ghost btn-sm">View</a></div>
+        </div>
+      </div>
+      <div class="car-card"><span class="tag">Saved</span><button class="fav" style="background:var(--ignition); color:var(--ink);"><i class="fa-solid fa-heart"></i></button>
+        <div class="media"><img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=1000&q=80" alt="Torque Voltage Hatch"></div>
+        <div class="body"><h3>Torque Voltage Hatch</h3><p class="mono">2026 · 0 KM</p>
+          <div class="foot"><div class="price"><span>Starting at</span>₹19.9L</div><a href="#" class="btn btn-ghost btn-sm">View</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-grid-2">
+      <div class="panel">
+        <div class="panel-head"><h3>Financing Offer</h3><span class="pill green">Pre-Approved</span></div>
+        <table>
+          <tbody>
+            <tr><td class="mono" style="color:var(--paper-dim); text-transform:uppercase; font-size:0.68rem;">Lender</td><td>Meridian Bank</td></tr>
+            <tr><td class="mono" style="color:var(--paper-dim); text-transform:uppercase; font-size:0.68rem;">Loan Amount</td><td>₹55,00,000</td></tr>
+            <tr><td class="mono" style="color:var(--paper-dim); text-transform:uppercase; font-size:0.68rem;">APR</td><td>8.4%</td></tr>
+            <tr><td class="mono" style="color:var(--paper-dim); text-transform:uppercase; font-size:0.68rem;">Tenure</td><td>60 Months</td></tr>
+            <tr><td class="mono" style="color:var(--paper-dim); text-transform:uppercase; font-size:0.68rem;">Monthly EMI</td><td style="color:var(--volt); font-family:var(--f-display); font-size:1.1rem;">₹1,12,400</td></tr>
+          </tbody>
+        </table>
+        <button class="btn btn-primary btn-block" style="margin-top:20px;">Accept Offer</button>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Service History</h3></div>
+        <table>
+          <thead><tr><th>Date</th><th>Service</th><th>Vehicle</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>May 12, 2026</td><td>Annual Inspection</td><td>Velocity GT</td><td><span class="pill green">Complete</span></td></tr>
+            <tr><td>Feb 3, 2026</td><td>Tyre Rotation</td><td>Velocity GT</td><td><span class="pill green">Complete</span></td></tr>
+            <tr><td>Aug 21, 2025</td><td>Software Update</td><td>Velocity GT</td><td><span class="pill green">Complete</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

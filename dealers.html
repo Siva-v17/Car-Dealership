@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dealer Network — Stackly Motors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<style>
+  :root{
+  --ink:        #0B0D10;   /* graphite black background */
+  --ink-2:      #14171C;   /* surface */
+  --ink-3:      #1C2027;   /* raised surface */
+  --line:       #262B33;   /* hairline borders */
+  --paper:      #ECE9E2;   /* warm off-white text */
+  --paper-dim:  #9BA0AA;   /* muted text */
+  --ignition:   #FF5A1F;   /* ignition orange — primary accent */
+  --ignition-2: #FF8A50;
+  --volt:       #00E0C6;   /* voltage teal — secondary accent */
+  --volt-dim:   #0A3A36;
+  --danger:     #FF4D5E;
+  --ok:         #3DDC84;
+
+  --f-display: 'Rajdhani', 'Arial Narrow', sans-serif;
+  --f-body:    'Inter', -apple-system, sans-serif;
+  --f-mono:    'JetBrains Mono', monospace;
+
+  --container: 1280px;
+  --radius: 10px;
+  --ease: cubic-bezier(.22,1,.36,1);
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0;
+  background:var(--ink);
+  color:var(--paper);
+  font-family:var(--f-body);
+  font-size:16px;
+  line-height:1.6;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+img{ max-width:100%; display:block; }
+a{ color:inherit; text-decoration:none; }
+ul{ list-style:none; margin:0; padding:0; }
+button{ font-family:inherit; cursor:pointer; }
+input,select,textarea{ font-family:inherit; }
+
+::selection{ background:var(--ignition); color:var(--ink); }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+}
+
+/* ---------- Type scale ---------- */
+h1,h2,h3,h4{
+  font-family:var(--f-display);
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.01em;
+  line-height:1.02;
+  margin:0;
+}
+h1{ font-size:clamp(3rem,7vw,6.5rem); letter-spacing:-0.01em; }
+h2{ font-size:clamp(2.1rem,4.4vw,3.6rem); }
+h3{ font-size:clamp(1.3rem,2.2vw,1.8rem); }
+p{ margin:0; color:var(--paper-dim); }
+.mono{ font-family:var(--f-mono); text-transform:uppercase; letter-spacing:0.14em; font-size:0.72rem; }
+
+.eyebrow{
+  font-family:var(--f-mono); text-transform:uppercase; letter-spacing:0.22em;
+  font-size:0.72rem; color:var(--ignition); display:flex; align-items:center; gap:10px; margin-bottom:14px;
+}
+.eyebrow::before{ content:''; width:26px; height:1px; background:var(--ignition); display:inline-block; }
+
+.container{ max-width:var(--container); margin:0 auto; padding:0 32px; }
+.section{ padding:56px 0; position:relative; }
+.section-tight{ padding:40px 0; }
+
+/* diagonal speed-line divider between sections */
+.speed-divider{
+  position:relative; height:64px; margin-top:-1px;
+  background:var(--ink);
+  clip-path:polygon(0 100%, 100% 0, 100% 100%);
+}
+.speed-divider.alt{ background:var(--ink-2); clip-path:polygon(0 0, 100% 100%, 0 100%); }
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex; align-items:center; gap:10px;
+  font-family:var(--f-display); font-weight:700; text-transform:uppercase; letter-spacing:0.06em;
+  font-size:0.92rem; padding:16px 30px; border-radius:4px; border:1px solid transparent;
+  transition:transform .35s var(--ease), background .35s var(--ease), border-color .35s var(--ease), color .35s var(--ease);
+  white-space:nowrap;
+}
+.btn-primary{ background:var(--ignition); color:var(--ink); }
+.btn-primary:hover{ background:var(--ignition-2); transform:translateY(-3px); }
+.btn-ghost{ border-color:var(--line); color:var(--paper); background:transparent; }
+.btn-ghost:hover{ border-color:var(--paper); transform:translateY(-3px); }
+.btn-volt{ background:var(--volt); color:var(--ink); }
+.btn-volt:hover{ transform:translateY(-3px); }
+.btn-sm{ padding:11px 20px; font-size:0.78rem; }
+.btn-block{ width:100%; justify-content:center; }
+
+/* ---------- Nav ---------- */
+.nav{
+  position:fixed; top:0; left:0; right:0; z-index:1000;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:22px 40px; transition:background .4s var(--ease), padding .4s var(--ease), border-color .4s var(--ease);
+  border-bottom:1px solid transparent;
+}
+.nav.is-scrolled{ background:rgba(11,13,16,0.86); backdrop-filter:blur(14px); padding:14px 40px; border-color:var(--line); }
+.nav-logo{ font-family:var(--f-display); font-weight:700; font-size:1.4rem; letter-spacing:0.03em; text-transform:uppercase; display:flex; align-items:center; gap:8px;}
+.nav-logo span{ color:var(--ignition); }
+.nav-links{ display:flex; gap:34px; }
+.nav-links a{
+  font-family:var(--f-mono); font-size:0.76rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--paper-dim);
+  position:relative; padding-bottom:4px; transition:color .3s;
+}
+.nav-links a::after{ content:''; position:absolute; left:0; bottom:0; width:0; height:1px; background:var(--ignition); transition:width .3s var(--ease); }
+.nav-links a:hover, .nav-links a.active{ color:var(--paper); }
+.nav-links a:hover::after, .nav-links a.active::after{ width:100%; }
+.nav-cta{ display:flex; align-items:center; gap:18px; }
+.nav-toggle{ display:none; width:26px; height:20px; position:relative; background:none; border:none; }
+.nav-toggle span{ position:absolute; left:0; width:100%; height:2px; background:var(--paper); transition:all .3s var(--ease); }
+.nav-toggle span:nth-child(1){ top:0; } .nav-toggle span:nth-child(2){ top:9px; } .nav-toggle span:nth-child(3){ top:18px; }
+
+/* ---------- Hero ---------- */
+.hero{
+  min-height:100vh; position:relative; display:flex; align-items:flex-end;
+  padding:160px 0 100px; overflow:hidden;
+}
+.hero-bg{ position:absolute; inset:0; z-index:0; }
+.hero-bg img{ width:100%; height:100%; object-fit:cover; opacity:0.55; }
+.hero-bg::after{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(11,13,16,0.35) 0%, rgba(11,13,16,0.55) 55%, var(--ink) 100%);
+}
+.hero-grid{ position:absolute; inset:0; z-index:0; opacity:0.15;
+  background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:60px 60px; mask-image:linear-gradient(180deg, black, transparent 75%);
+}
+.hero-content{ position:relative; z-index:2; width:100%; }
+.hero-title{ overflow:hidden; }
+.hero-title .line{ display:block; overflow:hidden; }
+.hero-title .line span{ display:inline-block; will-change:transform; }
+.hero-sub{ max-width:520px; margin-top:26px; font-size:1.05rem; }
+.hero-actions{ display:flex; gap:16px; margin-top:40px; flex-wrap:wrap; }
+.hero-meta{
+  display:flex; gap:48px; margin-top:56px; padding-top:24px; border-top:1px solid var(--line); flex-wrap:wrap;
+}
+.hero-meta .stat b{ font-family:var(--f-display); font-size:2rem; display:block; color:var(--paper); }
+.hero-meta .stat span{ font-family:var(--f-mono); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--paper-dim); }
+.scroll-cue{
+  position:absolute; right:40px; bottom:40px; z-index:2; display:flex; flex-direction:column; align-items:center; gap:10px;
+  font-family:var(--f-mono); font-size:0.65rem; letter-spacing:0.2em; color:var(--paper-dim); text-transform:uppercase;
+}
+.scroll-cue .line{ width:1px; height:50px; background:var(--line); position:relative; overflow:hidden; }
+.scroll-cue .line::after{ content:''; position:absolute; top:-50%; left:0; width:100%; height:50%; background:var(--ignition); animation:scrollcue 1.8s ease-in-out infinite; }
+@keyframes scrollcue{ 0%{ top:-50%; } 100%{ top:100%; } }
+
+/* ---------- Marquee ---------- */
+.marquee-strip{ border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:26px 0; overflow:hidden; background:var(--ink-2); }
+.marquee-track{ display:flex; gap:70px; width:max-content; }
+.marquee-track span{ font-family:var(--f-display); font-size:1.3rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--paper-dim); display:flex; align-items:center; gap:70px; }
+.marquee-track span i{ color:var(--ignition); font-style:normal; }
+
+/* ---------- Section header ---------- */
+.section-head{ display:flex; justify-content:space-between; align-items:flex-end; gap:40px; margin-bottom:36px; flex-wrap:wrap; }
+.section-head p{ max-width:420px; }
+
+/* ---------- Grids ---------- */
+.grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:40px; }
+.grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+.grid-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:24px; }
+
+/* ---------- Car card (3D tilt) ---------- */
+.car-card{
+  background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+  transform-style:preserve-3d; transition:border-color .3s, transform .1s linear; position:relative;
+}
+.car-card:hover{ border-color:#3a4150; }
+.car-card .tag{
+  position:absolute; top:16px; left:16px; z-index:2; background:var(--ignition); color:var(--ink);
+  font-family:var(--f-mono); font-size:0.62rem; text-transform:uppercase; letter-spacing:0.1em; padding:6px 10px; border-radius:3px;
+}
+.car-card .fav{
+  position:absolute; top:16px; right:16px; z-index:2; width:34px; height:34px; border-radius:50%;
+  background:rgba(11,13,16,0.6); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; color:var(--paper);
+  transition:background .3s, color .3s;
+}
+.car-card .fav:hover{ background:var(--ignition); color:var(--ink); }
+.car-card .media{ aspect-ratio:4/3; overflow:hidden; position:relative; }
+.car-card .media img{ width:100%; height:100%; object-fit:cover; transition:transform .7s var(--ease); }
+.car-card:hover .media img{ transform:scale(1.08); }
+.car-card .body{ padding:24px; }
+.car-card .body h3{ margin-bottom:6px; }
+.car-card .specs{ display:flex; gap:18px; margin:16px 0; flex-wrap:wrap; }
+.car-card .specs div{ font-family:var(--f-mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--paper-dim); }
+.car-card .specs b{ display:block; color:var(--paper); font-size:0.95rem; font-family:var(--f-display); }
+.car-card .foot{ display:flex; justify-content:space-between; align-items:center; padding-top:16px; border-top:1px solid var(--line); }
+.car-card .price{ font-family:var(--f-display); font-size:1.3rem; color:var(--volt); }
+.car-card .price span{ font-family:var(--f-mono); font-size:0.65rem; color:var(--paper-dim); display:block; text-transform:uppercase; }
+
+/* ---------- Service / feature cards ---------- */
+.feature-card{
+  background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius); padding:36px 30px;
+  transition:transform .4s var(--ease), border-color .4s;
+}
+.feature-card:hover{ transform:translateY(-8px); border-color:var(--ignition); }
+.feature-card .num{ font-family:var(--f-mono); color:var(--ignition); font-size:0.75rem; margin-bottom:22px; display:block; }
+.feature-card h3{ margin-bottom:12px; }
+.feature-card p{ font-size:0.92rem; }
+.feature-card .ic{ width:52px; height:52px; border-radius:50%; background:var(--volt-dim); color:var(--volt); display:flex; align-items:center; justify-content:center; margin-bottom:22px; font-size:1.3rem; }
+
+/* ---------- Stat counters ---------- */
+.stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:24px; }
+.stat-box{ text-align:center; padding:36px 20px; border:1px solid var(--line); border-radius:var(--radius); background:var(--ink-2); }
+.stat-box b{ font-family:var(--f-display); font-size:3rem; color:var(--paper); display:block; }
+.stat-box b span{ color:var(--ignition); }
+.stat-box p{ font-family:var(--f-mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; margin-top:8px; }
+
+/* ---------- Testimonial ---------- */
+.testi-card{ background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius); padding:36px; }
+.testi-card p.quote{ font-family:var(--f-display); font-size:1.3rem; color:var(--paper); text-transform:none; line-height:1.4; }
+.testi-who{ display:flex; align-items:center; gap:14px; margin-top:24px; }
+.testi-who img{ width:46px; height:46px; border-radius:50%; object-fit:cover; }
+.testi-who b{ display:block; font-family:var(--f-display); }
+.testi-who span{ font-family:var(--f-mono); font-size:0.68rem; color:var(--paper-dim); text-transform:uppercase; }
+
+/* ---------- Blog cards ---------- */
+.blog-card{ background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; transition:transform .4s var(--ease); }
+.blog-card:hover{ transform:translateY(-6px); }
+.blog-card .media{ aspect-ratio:16/10; overflow:hidden; }
+.blog-card .media img{ width:100%; height:100%; object-fit:cover; transition:transform .6s var(--ease); }
+.blog-card:hover .media img{ transform:scale(1.06); }
+.blog-card .body{ padding:24px; }
+.blog-card .meta{ display:flex; gap:14px; font-family:var(--f-mono); font-size:0.65rem; text-transform:uppercase; color:var(--ignition); letter-spacing:0.08em; margin-bottom:12px; }
+.blog-card h3{ margin-bottom:10px; text-transform:none; letter-spacing:0; font-size:1.25rem; }
+.blog-card p{ font-size:0.9rem; }
+
+/* ---------- Dealer cards ---------- */
+.dealer-card{ background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius); padding:28px; display:flex; flex-direction:column; gap:14px; transition:border-color .3s; }
+.dealer-card:hover{ border-color:var(--volt); }
+.dealer-card .badge{ font-family:var(--f-mono); font-size:0.62rem; color:var(--volt); text-transform:uppercase; letter-spacing:0.1em; }
+.dealer-card .row{ display:flex; justify-content:space-between; font-size:0.85rem; padding:8px 0; border-top:1px solid var(--line); }
+.dealer-card .row span:first-child{ color:var(--paper-dim); font-family:var(--f-mono); font-size:0.68rem; text-transform:uppercase; }
+
+/* ---------- Forms ---------- */
+.form-field{ margin-bottom:20px; }
+.form-field label{ display:block; font-family:var(--f-mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--paper-dim); margin-bottom:8px; }
+.form-field input, .form-field select, .form-field textarea{
+  width:100%; background:var(--ink); border:1px solid var(--line); border-radius:4px; padding:14px 16px; color:var(--paper);
+  font-size:0.95rem; transition:border-color .3s;
+}
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus{ outline:none; border-color:var(--ignition); }
+.form-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.checkbox-row{ display:flex; align-items:center; gap:10px; font-size:0.85rem; color:var(--paper-dim); margin-bottom:24px; }
+.checkbox-row a{ color:var(--ignition); }
+
+/* ---------- Footer ---------- */
+.footer{ border-top:1px solid var(--line); padding:56px 0 30px; background:var(--ink-2); }
+.footer-grid{ display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr 1.2fr; gap:40px; padding-bottom:44px; }
+.footer h4{ font-family:var(--f-mono); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--paper-dim); margin-bottom:20px; }
+.footer ul li{ margin-bottom:12px; }
+.footer ul a{ color:var(--paper-dim); font-size:0.9rem; transition:color .3s; }
+.footer ul a:hover{ color:var(--ignition); }
+.footer-bottom{ display:flex; justify-content:space-between; align-items:center; padding-top:26px; border-top:1px solid var(--line); font-family:var(--f-mono); font-size:0.68rem; color:var(--paper-dim); text-transform:uppercase; letter-spacing:0.08em; flex-wrap:wrap; gap:14px; }
+.social-row{ display:flex; gap:14px; }
+.social-row a{ width:36px; height:36px; border:1px solid var(--line); border-radius:50%; display:flex; align-items:center; justify-content:center; transition:border-color .3s, color .3s; }
+.social-row a:hover{ border-color:var(--ignition); color:var(--ignition); }
+
+/* ---------- Preloader (car dealership showroom themed) ---------- */
+.preloader{ position:fixed; inset:0; z-index:9999; background:var(--ink); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px; overflow:hidden; }
+.preloader-scene{ position:relative; width:320px; height:150px; }
+.preloader-doors{ position:absolute; inset:0; display:flex; z-index:3; pointer-events:none; }
+.preloader-doors .door{ flex:1; background:var(--ink-2); border:1px solid var(--line); position:relative; }
+.preloader-doors .door::after{ content:''; position:absolute; top:0; bottom:0; width:2px; background:var(--ignition); opacity:0.6; }
+.preloader-doors .door-l{ transform-origin:left center; border-right:none; }
+.preloader-doors .door-l::after{ right:0; }
+.preloader-doors .door-r{ transform-origin:right center; border-left:none; }
+.preloader-doors .door-r::after{ left:0; }
+.preloader-floor{
+  position:absolute; bottom:26px; left:0; right:0; height:3px;
+  background-image:repeating-linear-gradient(90deg, var(--line) 0 18px, transparent 18px 36px);
+  animation: roadmove 0.55s linear infinite;
+}
+.preloader-glow{
+  position:absolute; bottom:10px; left:50%; width:190px; height:24px; transform:translateX(-50%);
+  background:radial-gradient(ellipse at center, rgba(255,90,31,0.35) 0%, transparent 70%);
+  filter:blur(4px); animation: glowpulse 0.9s ease-in-out infinite;
+}
+@keyframes roadmove{ from{ background-position:0 0; } to{ background-position:-72px 0; } }
+@keyframes glowpulse{ 0%,100%{ opacity:0.5; transform:translateX(-50%) scaleX(0.92); } 50%{ opacity:0.95; transform:translateX(-50%) scaleX(1.05); } }
+.preloader-car{
+  position:absolute; bottom:26px; left:-40%; width:160px;
+  animation: cardrive 2.6s ease-in-out infinite;
+  filter:drop-shadow(0 10px 12px rgba(0,0,0,0.5));
+}
+@keyframes cardrive{
+  0%{ left:-40%; }
+  45%{ left:calc(50% - 80px); }
+  55%{ left:calc(50% - 80px); }
+  100%{ left:140%; }
+}
+.preloader-car .wheel{ transform-box:fill-box; transform-origin:center; animation:wheelspin 0.4s linear infinite; }
+@keyframes wheelspin{ to{ transform:rotate(360deg); } }
+.preloader-car .headlight-beam{ animation:beampulse 0.9s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
+@keyframes beampulse{ 0%,100%{ opacity:0.35; } 50%{ opacity:0.9; } }
+.preloader-badge{
+  position:absolute; top:6px; left:50%; transform:translateX(-50%); z-index:4;
+  display:flex; align-items:center; gap:8px; padding:8px 16px; border:1px solid var(--line);
+  border-radius:20px; background:rgba(20,23,28,0.7); backdrop-filter:blur(4px);
+  opacity:0; animation: badgein 0.6s ease-out 2.4s forwards;
+}
+@keyframes badgein{ from{ opacity:0; transform:translateX(-50%) translateY(-8px); } to{ opacity:1; transform:translateX(-50%) translateY(0); } }
+.preloader-badge i{ color:var(--ignition); font-size:0.7rem; }
+.preloader-badge span{ font-family:var(--f-mono); font-size:0.62rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--paper-dim); }
+.preloader-text{ display:flex; flex-direction:column; align-items:center; gap:8px; }
+.preloader .word{ font-family:var(--f-display); font-size:1.1rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--paper-dim); }
+.preloader-status{ font-family:var(--f-mono); font-size:0.68rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--paper-dim); display:flex; gap:8px; align-items:center; }
+.preloader-status .preloader-pct{ color:var(--ignition); }
+.preloader .bar{ width:220px; height:2px; background:var(--line); overflow:hidden; }
+.preloader .bar i{ display:block; width:0%; height:100%; background:var(--ignition); }
+
+/* ---------- Reveal utility ---------- */
+.reveal{ opacity:0; transform:translateY(40px); }
+
+/* ---------- Auth split ---------- */
+.auth-wrap{ min-height:100vh; display:grid; grid-template-columns:1fr 1fr; }
+.auth-visual{ position:relative; overflow:hidden; }
+.auth-visual img{ width:100%; height:100%; object-fit:cover; }
+.auth-visual::after{ content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(11,13,16,0.1), rgba(11,13,16,0.9)); }
+.auth-visual .caption{ position:absolute; bottom:50px; left:50px; z-index:2; max-width:400px; }
+.auth-form-side{ display:flex; align-items:center; justify-content:center; padding:60px; }
+.auth-box{ width:100%; max-width:420px; }
+.auth-tabs{ display:flex; gap:6px; background:var(--ink-2); padding:6px; border-radius:6px; margin-bottom:36px; }
+.auth-tabs button{ flex:1; background:none; border:none; padding:12px; color:var(--paper-dim); font-family:var(--f-mono); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; border-radius:4px; transition:all .3s; }
+.auth-tabs button.active{ background:var(--ignition); color:var(--ink); }
+.divider-or{ display:flex; align-items:center; gap:14px; margin:26px 0; color:var(--paper-dim); font-family:var(--f-mono); font-size:0.68rem; text-transform:uppercase; }
+.divider-or::before, .divider-or::after{ content:''; flex:1; height:1px; background:var(--line); }
+.social-auth{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.social-auth button{ background:var(--ink-2); border:1px solid var(--line); border-radius:4px; padding:13px; color:var(--paper); font-family:var(--f-body); font-size:0.85rem; display:flex; align-items:center; justify-content:center; gap:8px; transition:border-color .3s; }
+.social-auth button:hover{ border-color:var(--paper); }
+
+/* ---------- Dashboard layout ---------- */
+.dash{ display:grid; grid-template-columns:264px 1fr; min-height:100vh; }
+.dash-sidebar{ background:var(--ink-2); border-right:1px solid var(--line); padding:28px 20px; display:flex; flex-direction:column; position:sticky; top:0; height:100vh; }
+.dash-logo{ font-family:var(--f-display); font-size:1.25rem; text-transform:uppercase; letter-spacing:0.03em; padding:0 12px 30px; border-bottom:1px solid var(--line); margin-bottom:22px; }
+.dash-logo span{ color:var(--ignition); }
+.dash-nav-group{ margin-bottom:22px; }
+.dash-nav-group h5{ font-family:var(--f-mono); font-size:0.62rem; text-transform:uppercase; letter-spacing:0.14em; color:var(--paper-dim); padding:0 12px; margin:0 0 10px; }
+.dash-nav-group a{ display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:6px; color:var(--paper-dim); font-size:0.88rem; margin-bottom:2px; transition:background .25s, color .25s; }
+.dash-nav-group a i{ width:18px; text-align:center; }
+.dash-nav-group a:hover{ background:var(--ink-3); color:var(--paper); }
+.dash-nav-group a.active{ background:var(--ignition); color:var(--ink); font-weight:600; }
+.dash-user{ margin-top:auto; display:flex; align-items:center; gap:12px; padding:14px 12px; border-top:1px solid var(--line); }
+.dash-user img{ width:38px; height:38px; border-radius:50%; object-fit:cover; }
+.dash-user b{ font-size:0.85rem; display:block; }
+.dash-user span{ font-size:0.7rem; color:var(--paper-dim); }
+.dash-main{ padding:32px 40px; max-width:100%; overflow-x:hidden; }
+.dash-topbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:16px; }
+.dash-search{ display:flex; align-items:center; gap:10px; background:var(--ink-2); border:1px solid var(--line); border-radius:6px; padding:10px 16px; width:320px; max-width:100%; }
+.dash-search input{ background:none; border:none; color:var(--paper); width:100%; }
+.dash-search input:focus{ outline:none; }
+.dash-topbar-actions{ display:flex; align-items:center; gap:16px; }
+.icon-btn{ width:40px; height:40px; border-radius:8px; background:var(--ink-2); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; position:relative; color:var(--paper); }
+.icon-btn .dot{ position:absolute; top:8px; right:8px; width:7px; height:7px; border-radius:50%; background:var(--ignition); }
+
+.kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:32px; }
+.kpi-card{ background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius); padding:24px; }
+.kpi-card .top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; }
+.kpi-card .ic{ width:40px; height:40px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:var(--volt-dim); color:var(--volt); }
+.kpi-card .delta{ font-family:var(--f-mono); font-size:0.68rem; padding:4px 8px; border-radius:4px; }
+.kpi-card .delta.up{ background:rgba(61,220,132,0.12); color:var(--ok); }
+.kpi-card .delta.down{ background:rgba(255,77,94,0.12); color:var(--danger); }
+.kpi-card b{ font-family:var(--f-display); font-size:2.2rem; display:block; }
+.kpi-card p{ font-family:var(--f-mono); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; margin-top:4px; }
+
+.panel{ background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius); padding:26px; margin-bottom:24px; }
+.panel-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; }
+.panel-head h3{ text-transform:none; letter-spacing:0; font-size:1.1rem; }
+.dash-grid-2{ display:grid; grid-template-columns:1.6fr 1fr; gap:24px; }
+
+table{ width:100%; border-collapse:collapse; }
+table th{ text-align:left; font-family:var(--f-mono); font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--paper-dim); padding:10px 14px; border-bottom:1px solid var(--line); }
+table td{ padding:14px; border-bottom:1px solid var(--line); font-size:0.87rem; }
+table tr:last-child td{ border-bottom:none; }
+.pill{ font-family:var(--f-mono); font-size:0.62rem; text-transform:uppercase; padding:5px 10px; border-radius:20px; letter-spacing:0.06em; }
+.pill.green{ background:rgba(61,220,132,0.12); color:var(--ok); }
+.pill.orange{ background:rgba(255,90,31,0.12); color:var(--ignition); }
+.pill.blue{ background:rgba(0,224,198,0.12); color:var(--volt); }
+.pill.red{ background:rgba(255,77,94,0.12); color:var(--danger); }
+.row-user{ display:flex; align-items:center; gap:10px; }
+.row-user img{ width:32px; height:32px; border-radius:50%; object-fit:cover; }
+
+.bars{ display:flex; align-items:flex-end; gap:12px; height:180px; }
+.bars .bar{ flex:1; background:linear-gradient(180deg, var(--ignition), var(--ignition-2)); border-radius:4px 4px 0 0; position:relative; }
+.bars .bar span{ position:absolute; bottom:-24px; left:0; right:0; text-align:center; font-family:var(--f-mono); font-size:0.6rem; color:var(--paper-dim); text-transform:uppercase; }
+
+.progress-item{ margin-bottom:18px; }
+.progress-item .lbl{ display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:8px; }
+.progress-track{ height:6px; background:var(--ink); border-radius:6px; overflow:hidden; }
+.progress-fill{ height:100%; background:var(--volt); border-radius:6px; }
+
+/* ---------- Filters bar (Cars page) ---------- */
+.filters-bar{ display:flex; gap:14px; flex-wrap:wrap; align-items:center; padding:24px; background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius); margin-bottom:44px; }
+.filters-bar select, .filters-bar input{ background:var(--ink); border:1px solid var(--line); border-radius:4px; padding:12px 14px; color:var(--paper); font-size:0.85rem; }
+.filter-tags{ display:flex; gap:10px; flex-wrap:wrap; }
+.filter-tags button{ background:var(--ink); border:1px solid var(--line); color:var(--paper-dim); padding:9px 18px; border-radius:20px; font-size:0.78rem; font-family:var(--f-mono); text-transform:uppercase; letter-spacing:0.06em; transition:all .3s; }
+.filter-tags button.active{ background:var(--ignition); color:var(--ink); border-color:var(--ignition); }
+
+/* ---------- Timeline (About) ---------- */
+.timeline{ position:relative; padding-left:40px; }
+.timeline::before{ content:''; position:absolute; left:6px; top:0; bottom:0; width:1px; background:var(--line); }
+.timeline-item{ position:relative; padding-bottom:56px; }
+.timeline-item::before{ content:''; position:absolute; left:-40px; top:4px; width:13px; height:13px; border-radius:50%; background:var(--ignition); box-shadow:0 0 0 4px rgba(255,90,31,0.15); }
+.timeline-item .yr{ font-family:var(--f-mono); color:var(--ignition); font-size:0.78rem; letter-spacing:0.08em; margin-bottom:8px; display:block; }
+
+/* ---------- Team ---------- */
+.team-card{ position:relative; overflow:hidden; border-radius:var(--radius); }
+.team-card .media{ aspect-ratio:3/4; overflow:hidden; }
+.team-card .media img{ width:100%; height:100%; object-fit:cover; filter:grayscale(60%); transition:filter .5s, transform .6s var(--ease); }
+.team-card:hover .media img{ filter:grayscale(0%); transform:scale(1.05); }
+.team-card .info{ padding:18px 4px; }
+.team-card .info b{ font-family:var(--f-display); text-transform:uppercase; font-size:1.05rem; }
+.team-card .info span{ font-family:var(--f-mono); font-size:0.68rem; color:var(--paper-dim); text-transform:uppercase; letter-spacing:0.08em; }
+
+/* ---------- Chips ---------- */
+.chip-row{ display:flex; flex-wrap:wrap; gap:12px; }
+.chip-row a, .chip-row button{ padding:12px 22px; border:1px solid var(--line); border-radius:30px; font-family:var(--f-mono); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--paper-dim); background:transparent; transition:all .3s; }
+.chip-row a:hover, .chip-row button:hover{ border-color:var(--ignition); color:var(--paper); }
+
+/* ---------- FAQ Accordion ---------- */
+.faq-list{ display:flex; flex-direction:column; border-top:1px solid var(--line); }
+.faq-item{ border-bottom:1px solid var(--line); }
+.faq-q{
+  width:100%; background:none; border:none; padding:22px 4px; display:flex; align-items:center; justify-content:space-between;
+  color:var(--paper); font-family:var(--f-display); font-size:1.05rem; text-transform:uppercase; letter-spacing:0.02em; text-align:left; gap:20px;
+}
+.faq-q i{ color:var(--ignition); transition:transform .35s var(--ease); flex-shrink:0; }
+.faq-item.open .faq-q i{ transform:rotate(45deg); }
+.faq-a{ max-height:0; overflow:hidden; transition:max-height .4s var(--ease); }
+.faq-a p{ padding:0 4px 22px; max-width:640px; font-size:0.92rem; }
+.faq-item.open .faq-a{ max-height:220px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1080px){
+  .grid-4{ grid-template-columns:repeat(2,1fr); }
+  .grid-3{ grid-template-columns:repeat(2,1fr); }
+  .stat-row{ grid-template-columns:repeat(2,1fr); }
+  .footer-grid{ grid-template-columns:1fr 1fr; }
+  .dash{ grid-template-columns:1fr; }
+  .dash-sidebar{ position:fixed; left:0; top:0; bottom:0; z-index:1200; transform:translateX(-100%); transition:transform .4s var(--ease); width:264px; }
+  .dash-sidebar.open{ transform:translateX(0); }
+  .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+  .dash-grid-2{ grid-template-columns:1fr; }
+  .auth-wrap{ grid-template-columns:1fr; }
+  .auth-visual{ display:none; }
+}
+@media (max-width: 760px){
+  .nav-links{ position:fixed; top:0; right:0; height:100vh; width:78%; background:var(--ink-2); flex-direction:column; justify-content:center; padding:40px; gap:28px; transform:translateX(100%); transition:transform .5s var(--ease); border-left:1px solid var(--line); }
+  .nav-links.open{ transform:translateX(0); }
+  .nav-toggle{ display:block; }
+  .grid-4, .grid-3, .grid-2{ grid-template-columns:1fr; }
+  .stat-row{ grid-template-columns:1fr 1fr; }
+  .footer-grid{ grid-template-columns:1fr; gap:30px; }
+  .form-row{ grid-template-columns:1fr; }
+  .kpi-grid{ grid-template-columns:1fr; }
+  .section{ padding:40px 0; }
+  .hero-meta{ gap:28px; }
+}
+
+
+.footer-newsletter{
+  background:var(--ink-3); border:1px solid var(--line); border-radius:var(--radius);
+  padding:28px; display:flex; flex-direction:column; gap:16px;
+}
+.footer-newsletter h4{ margin:0; }
+.footer-newsletter p{ font-size:0.85rem; }
+.newsletter-form{ display:flex; flex-direction:column; gap:10px; }
+.newsletter-form .nl-field{ width:100%; }
+.newsletter-form input{
+  width:100%; background:var(--ink); border:1px solid var(--line); border-radius:4px; padding:13px 16px; color:var(--paper);
+  font-size:0.9rem; transition:border-color .3s; box-sizing:border-box;
+}
+.newsletter-form input:focus{ outline:none; border-color:var(--ignition); }
+.newsletter-form input.field-invalid{ border-color:var(--danger); }
+.newsletter-form .field-error{
+  display:none; color:var(--danger); font-family:var(--f-mono); font-size:0.68rem;
+  letter-spacing:0.02em; margin-top:6px;
+}
+.newsletter-form .field-error.show{ display:block; }
+@media (min-width: 560px){
+  .newsletter-form{ flex-direction:row; align-items:flex-start; }
+  .newsletter-form .nl-field{ flex:1; }
+  .newsletter-form button{ flex-shrink:0; width:auto; }
+}
+
+/* ---------- Newsletter success modal ---------- */
+.success-overlay{
+  position:fixed; inset:0; z-index:5000;
+  background:rgba(11,13,16,0.72);
+  backdrop-filter:blur(6px);
+  display:flex; align-items:center; justify-content:center;
+  padding:24px;
+  opacity:0; pointer-events:none;
+  transition:opacity .3s ease;
+}
+.success-overlay.open{ opacity:1; pointer-events:auto; }
+.success-modal{
+  background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius);
+  max-width:420px; width:100%; padding:40px 32px; text-align:center;
+  transform:translateY(16px) scale(0.97); opacity:0;
+  transition:transform .35s var(--ease), opacity .35s ease;
+}
+.success-overlay.open .success-modal{ transform:translateY(0) scale(1); opacity:1; }
+.success-modal .ic{
+  width:64px; height:64px; border-radius:50%; margin:0 auto 20px;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(61,220,132,0.12); color:var(--ok); font-size:1.6rem;
+}
+.success-modal h3{ font-size:1.3rem; margin-bottom:12px; }
+.success-modal p{ font-size:0.92rem; max-width:320px; margin:0 auto; }
+.success-modal .btn{ margin-top:26px; }
+</style>
+<body>
+<div class="preloader">
+  <div class="preloader-badge"><i class="fa-solid fa-shield-halved"></i><span>42 Certified Dealerships</span></div>
+  <div class="preloader-scene">
+    <div class="preloader-doors">
+      <div class="door door-l"></div>
+      <div class="door door-r"></div>
+    </div>
+    <div class="preloader-glow"></div>
+    <div class="preloader-floor"></div>
+    <svg class="preloader-car" viewBox="0 0 200 90" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="beamGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#FF8A50" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#FF8A50" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <ellipse class="headlight-beam" cx="188" cy="50" rx="42" ry="12" fill="url(#beamGrad)"/>
+      <path d="M18 58 L30 58 L38 40 Q42 32 52 32 L118 32 Q128 32 134 40 L148 58 L182 58 L182 66 L18 66 Z" fill="#ECE9E2"/>
+      <path d="M52 34 L118 34 Q124 34 128 40 L133 50 L60 50 L56 43 Q54 38 52 34 Z" fill="#0B0D10" opacity="0.55"/>
+      <rect x="18" y="58" width="164" height="6" fill="#FF5A1F" opacity="0.9"/>
+      <circle class="wheel" cx="56" cy="66" r="14" fill="#14171C" stroke="#FF5A1F" stroke-width="3"/>
+      <circle cx="56" cy="66" r="4" fill="#9BA0AA"/>
+      <circle class="wheel" cx="148" cy="66" r="14" fill="#14171C" stroke="#FF5A1F" stroke-width="3"/>
+      <circle cx="148" cy="66" r="4" fill="#9BA0AA"/>
+      <circle cx="184" cy="50" r="4" fill="#FF8A50"/>
+    </svg>
+  </div>
+  <div class="preloader-text">
+    <span class="word">STACKLY MOTORS</span>
+    <span class="preloader-status">Opening the network map <span class="preloader-pct">0%</span></span>
+  </div>
+  <div class="bar"><i></i></div>
+</div>
+
+<header class="nav">
+  <a href="index.html" class="nav-logo"><img src="./assets/stackly-removebg-preview.png" alt="" style="height: 60px; width: 120px;"></a>
+  <nav class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="services.html">Services</a>
+    <a href="cars.html">Cars</a>
+    <a href="dealers.html" class="active">Dealers</a>
+    <!-- <a href="blog.html">Blog</a> -->
+    <a href="contact.html">Contact</a>
+  </nav>
+  <div class="nav-cta">
+    <a href="login.html" class="btn btn-ghost btn-sm">Login</a>
+    <!-- <a href="cars.html" class="btn btn-primary btn-sm">Browse Cars</a> -->
+    <button class="nav-toggle"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="hero" style="min-height:60vh;">
+  <div class="hero-bg"><img src="https://images.unsplash.com/photo-1567808291548-fc3ee16dbd0e?auto=format&fit=crop&w=2400&q=80" alt="Dealership storefront"></div>
+  <div class="hero-grid"></div>
+  <div class="container hero-content">
+    <div class="eyebrow hero-badge">42 Verified Locations</div>
+    <h1 class="hero-title">
+      <span class="line">OUR DEALER</span>
+      <span class="line">NETWORK</span>
+    </h1>
+    <p class="hero-sub">Every partner dealership is re-certified annually against our pricing transparency and service quality standards.</p>
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="container">
+    <div class="stat-row">
+      <div class="stat-box"><b data-count="42">0</b><p>Verified Dealerships</p></div>
+      <div class="stat-box"><b data-count="6">0</b><p>States Covered</p></div>
+      <div class="stat-box"><b data-count="4.8" data-suffix="/5">0</b><p>Avg. Network Rating</p></div>
+      <div class="stat-box"><b data-count="1240" data-suffix="+">0</b><p>Vehicles Across Network</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="container">
+    <div class="filters-bar">
+      <select><option>State</option><option>Tamil Nadu</option><option>Karnataka</option><option>Kerala</option></select>
+      <select><option>City</option><option>Salem</option><option>Chennai</option><option>Coimbatore</option><option>Bengaluru</option></select>
+      <select><option>Specialty</option><option>New Cars</option><option>Certified Pre-Owned</option><option>Electric</option><option>Luxury</option></select>
+      <input type="text" placeholder="Search dealer name...">
+      <button class="btn btn-primary btn-sm">Search</button>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:10px;">
+  <div class="container">
+    <div class="section-head">
+      <div><div class="eyebrow">Featured Dealers</div><h2>Top-rated this quarter</h2></div>
+    </div>
+    <div class="grid-3">
+      <div class="dealer-card">
+        <span class="badge">★ 4.9 · Salem HQ</span>
+        <h3>Stackly Motors — Salem Central</h3>
+        <p>Our flagship showroom with full EV charging bay and 12-lift service center.</p>
+        <div class="row"><span>Address</span><span>44 Junction Main Rd, Salem</span></div>
+        <div class="row"><span>Hours</span><span>9:00 AM – 8:00 PM</span></div>
+        <div class="row"><span>Inventory</span><span>186 Vehicles</span></div>
+        <div class="row"><span>Specialty</span><span>New · Certified · EV</span></div>
+        <a href="contact.html" class="btn btn-primary btn-sm btn-block" style="margin-top:10px;">Book a Visit</a>
+      </div>
+      <div class="dealer-card">
+        <span class="badge">★ 4.8 · Chennai OMR</span>
+        <h3>Stackly Motors — OMR Chennai</h3>
+        <p>Largest luxury and performance inventory in the network, with private viewing bays.</p>
+        <div class="row"><span>Address</span><span>212 OMR, Chennai</span></div>
+        <div class="row"><span>Hours</span><span>10:00 AM – 9:00 PM</span></div>
+        <div class="row"><span>Inventory</span><span>241 Vehicles</span></div>
+        <div class="row"><span>Specialty</span><span>Luxury · New</span></div>
+        <a href="contact.html" class="btn btn-primary btn-sm btn-block" style="margin-top:10px;">Book a Visit</a>
+      </div>
+      <div class="dealer-card">
+        <span class="badge">★ 4.9 · Coimbatore</span>
+        <h3>Stackly Motors — Coimbatore RS Puram</h3>
+        <p>Certified pre-owned specialist with in-house 150-point inspection lab.</p>
+        <div class="row"><span>Address</span><span>77 RS Puram, Coimbatore</span></div>
+        <div class="row"><span>Hours</span><span>9:30 AM – 7:30 PM</span></div>
+        <div class="row"><span>Inventory</span><span>154 Vehicles</span></div>
+        <div class="row"><span>Specialty</span><span>Certified · Financing</span></div>
+        <a href="contact.html" class="btn btn-primary btn-sm btn-block" style="margin-top:10px;">Book a Visit</a>
+      </div>
+      <div class="dealer-card">
+        <span class="badge">★ 4.7 · Bengaluru</span>
+        <h3>Stackly Motors — Indiranagar</h3>
+        <p>Dedicated EV desk with home charger installation partners on-site.</p>
+        <div class="row"><span>Address</span><span>19 100ft Rd, Indiranagar, Bengaluru</span></div>
+        <div class="row"><span>Hours</span><span>10:00 AM – 8:00 PM</span></div>
+        <div class="row"><span>Inventory</span><span>132 Vehicles</span></div>
+        <div class="row"><span>Specialty</span><span>Electric · New</span></div>
+        <a href="contact.html" class="btn btn-primary btn-sm btn-block" style="margin-top:10px;">Book a Visit</a>
+      </div>
+      <div class="dealer-card">
+        <span class="badge">★ 4.6 · Madurai</span>
+        <h3>Stackly Motors — Madurai Bypass</h3>
+        <p>Family-run partner dealership since 2018, strong in hatchback and sedan segment.</p>
+        <div class="row"><span>Address</span><span>5 Bypass Rd, Madurai</span></div>
+        <div class="row"><span>Hours</span><span>9:00 AM – 7:00 PM</span></div>
+        <div class="row"><span>Inventory</span><span>98 Vehicles</span></div>
+        <div class="row"><span>Specialty</span><span>Best Value</span></div>
+        <a href="contact.html" class="btn btn-primary btn-sm btn-block" style="margin-top:10px;">Book a Visit</a>
+      </div>
+      <div class="dealer-card">
+        <span class="badge">★ 4.8 · Kochi</span>
+        <h3>Stackly Motors — Kochi Marine Drive</h3>
+        <p>Newest addition to the network, opened 2025, with full digital delivery pod.</p>
+        <div class="row"><span>Address</span><span>3 Marine Drive, Kochi</span></div>
+        <div class="row"><span>Hours</span><span>10:00 AM – 8:00 PM</span></div>
+        <div class="row"><span>Inventory</span><span>76 Vehicles</span></div>
+        <div class="row"><span>Specialty</span><span>New · EV</span></div>
+        <a href="contact.html" class="btn btn-primary btn-sm btn-block" style="margin-top:10px;">Book a Visit</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="container">
+    <div class="section-head">
+      <div><div class="eyebrow">Coverage</div><h2>Browse by region</h2></div>
+    </div>
+    <div class="chip-row">
+      <a href="#">Tamil Nadu (18)</a>
+      <a href="#">Karnataka (9)</a>
+      <a href="#">Kerala (6)</a>
+      <a href="#">Andhra Pradesh (5)</a>
+      <a href="#">Telangana (4)</a>
+    </div>
+  </div>
+</section>
+
+<div class="speed-divider"></div>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div><div class="eyebrow">Certification Standards</div><h2>What it takes to<br>wear the badge</h2></div>
+      <p>Every dealership on the network is audited annually against these four pillars.</p>
+    </div>
+    <div class="grid-4">
+      <div class="feature-card">
+        <span class="num">01</span>
+        <div class="ic"><i class="fa-solid fa-magnifying-glass-dollar"></i></div>
+        <h3>Price Transparency</h3>
+        <p>No hidden markups — on-road pricing must be published and match the buyer platform.</p>
+      </div>
+      <div class="feature-card">
+        <span class="num">02</span>
+        <div class="ic"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3>150-Point Inspection</h3>
+        <p>Certified pre-owned stock must pass the same inspection lab standard network-wide.</p>
+      </div>
+      <div class="feature-card">
+        <span class="num">03</span>
+        <div class="ic"><i class="fa-solid fa-comments"></i></div>
+        <h3>Response Time</h3>
+        <p>Buyer enquiries answered within 2 hours during listed operating hours.</p>
+      </div>
+      <div class="feature-card">
+        <span class="num">04</span>
+        <div class="ic"><i class="fa-solid fa-star"></i></div>
+        <h3>Customer Rating</h3>
+        <p>Minimum 4.5-star average maintained, reviewed quarterly, to stay certified.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="speed-divider alt"></div>
+
+<section class="section" style="background:var(--ink-2); padding-top:64px;">
+  <div class="container">
+    <div class="section-head">
+      <div><div class="eyebrow">Partner Voices</div><h2>What dealers say<br>about the network</h2></div>
+    </div>
+    <div class="grid-3">
+      <div class="testi-card">
+        <p class="quote">"Sales lifted 40% in our first two quarters. The buyer platform brings qualified leads we never had walking in cold."</p>
+        <div class="testi-who">
+          <div class="ic" style="width:46px; height:46px; border-radius:50%;"><i class="fa-solid fa-user-tie"></i></div>
+          <div><b>Ramesh Iyer</b><span>Owner, Coimbatore RS Puram</span></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <p class="quote">"The shared inspection lab standard saved us from building our own — and buyers trust the certification instantly."</p>
+        <div class="testi-who">
+          <div class="ic" style="width:46px; height:46px; border-radius:50%;"><i class="fa-solid fa-user-tie"></i></div>
+          <div><b>Fathima Noor</b><span>GM, Kochi Marine Drive</span></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <p class="quote">"Onboarding took under six weeks. The financing dashboard alone cut our loan approval time in half."</p>
+        <div class="testi-who">
+          <div class="ic" style="width:46px; height:46px; border-radius:50%;"><i class="fa-solid fa-user-tie"></i></div>
+          <div><b>Devendra Rao</b><span>Owner, Indiranagar Bengaluru</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="grid-2" style="align-items:center;">
+      <div>
+        <div class="eyebrow">Become a Partner</div>
+        <h2>Join the Stackly<br>dealer network</h2>
+        <p style="margin-top:20px; max-width:440px;">Get access to our buyer platform, digital financing tools, and 150-point inspection certification for your own lot.</p>
+        <div class="stat-row" style="grid-template-columns:1fr 1fr; margin-top:32px;">
+          <div class="stat-box"><b data-count="38" data-suffix="%">0</b><p>Avg. Sales Lift</p></div>
+          <div class="stat-box"><b data-count="6" data-suffix=" Wks">0</b><p>Onboarding Time</p></div>
+        </div>
+        <a href="contact.html" class="btn btn-primary" style="margin-top:30px;">Apply to Join</a>
+      </div>
+      <div><img data-parallax src="https://images.unsplash.com/photo-1552580262-9bfeb2d21e21?auto=format&fit=crop&w=1400&q=80" alt="Dealership lot at dusk" style="border-radius:var(--radius); width:100%; height:520px; object-fit:cover;"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section-tight" style="background:var(--ink-2);">
+  <div class="container">
+    <div class="section-head"><div><div class="eyebrow">FAQ</div><h2>Questions from<br>prospective partners</h2></div></div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q"><span>What does it cost to become a partner dealer?</span><i class="fa-solid fa-plus"></i></button>
+        <div class="faq-a"><p>There's no upfront listing fee — Stackly earns a small commission per completed sale routed through the buyer platform.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>Do we need to run our own 150-point inspection lab?</span><i class="fa-solid fa-plus"></i></button>
+        <div class="faq-a"><p>No, certified regional inspection labs are shared across nearby partner dealerships to keep setup costs low.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>Can independent dealers outside Tamil Nadu apply?</span><i class="fa-solid fa-plus"></i></button>
+        <div class="faq-a"><p>Yes, we're actively onboarding in Karnataka, Kerala, Andhra Pradesh and Telangana, with more states opening this year.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>How is the 4.5-star minimum rating measured?</span><i class="fa-solid fa-plus"></i></button>
+        <div class="faq-a"><p>From verified post-purchase buyer reviews collected through the platform, reviewed and recalculated every quarter.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a href="index.html" class="nav-logo"><img src="./assets/stackly-removebg-preview.png" alt="" style="height: 60px; width: 120px;"></a>
+        <p>Premium new, certified pre-owned and electric vehicles from a curated dealer network across India.</p>
+        <div class="social-row" style="margin-top:24px;">
+          <a href="#"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#"><i class="fa-brands fa-youtube"></i></a>
+        </div>
+      </div>
+      <div><h4>Explore</h4><ul>
+        <li><a href="cars.html">Inventory</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="dealers.html">Dealer Network</a></li>
+        <li><a href="blog.html">Journal</a></li>
+      </ul></div>
+      <div><h4>Company</h4><ul>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Careers</a></li>
+        <li><a href="contact.html">Press</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul></div>
+      <div><h4>Account</h4><ul>
+        <li><a href="login.html">Sign In</a></li>
+        <li><a href="user-dashboard.html">My Dashboard</a></li>
+        <li><a href="admin-dashboard.html">Admin Portal</a></li>
+        <li><a href="contact.html">Support</a></li>
+      </ul></div>
+      <div class="footer-newsletter">
+  <h4 style="margin-bottom:2px;">Newsletter</h4>
+  <p>Get new arrivals and dealer events in your inbox.</p>
+  <form class="newsletter-form" id="newsletterForm" novalidate>
+    <div class="nl-field">
+      <input type="email" name="newsletterEmail" placeholder="you@email.com" required>
+      <span class="field-error" id="newsletterError">Please enter a valid email address.</span>
+    </div>
+    <button type="submit" class="btn btn-primary btn-sm">Subscribe</button>
+  </form>
+</div>
+
+<!-- place right after </footer> -->
+<div class="success-overlay" id="newsletterSuccessOverlay">
+  <div class="success-modal">
+    <div class="ic"><i class="fa-solid fa-check"></i></div>
+    <h3>You're Subscribed</h3>
+    <p>New arrivals and dealer events will land straight in your inbox.</p>
+    <button type="button" class="btn btn-primary btn-block" id="newsletterSuccessClose">Done</button>
+  </div>
+</div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Stackly Motors. All rights reserved.</span>
+      <span>Salem, Tamil Nadu · India</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* ---------------- Preloader ---------------- */
+  const preloader = document.querySelector('.preloader');
+  if (preloader) {
+    const bar = preloader.querySelector('.bar i');
+    const pct = preloader.querySelector('.preloader-pct');
+    const doorL = preloader.querySelector('.door-l');
+    const doorR = preloader.querySelector('.door-r');
+    const pctObj = { val: 0 };
+    const tl = gsap.timeline({
+      onComplete: () => {
+        gsap.to([doorL, doorR], {
+          scaleX: 0, duration: 0.7, ease: 'power3.inOut',
+          onComplete: () => {
+            gsap.to(preloader, {
+              yPercent: -100, duration: 0.9, ease: 'power4.inOut',
+              onComplete: () => preloader.remove()
+            });
+          }
+        });
+        runIntro();
+      }
+    });
+    tl.to(bar, { width: '100%', duration: 2.6, ease: 'power2.inOut' }, 0);
+    tl.to(pctObj, {
+      val: 100, duration: 2.6, ease: 'power2.inOut',
+      onUpdate: () => { if (pct) pct.textContent = Math.round(pctObj.val) + '%'; }
+    }, 0);
+  } else {
+    runIntro();
+  }
+
+  /* ---------------- Split hero title into lines/words for reveal ---------------- */
+  document.querySelectorAll('.hero-title').forEach(el => {
+    const lines = el.querySelectorAll('.line');
+    lines.forEach(line => {
+      const text = line.textContent;
+      line.innerHTML = `<span>${text}</span>`;
+    });
+  });
+
+  function runIntro() {
+    const heroLines = gsap.utils.toArray('.hero-title .line span');
+    if (heroLines.length) {
+      gsap.set(heroLines, { yPercent: 120, rotate: 4 });
+      gsap.to(heroLines, {
+        yPercent: 0, rotate: 0, duration: 1.1, ease: 'power4.out', stagger: 0.09, delay: 0.15
+      });
+    }
+    gsap.from('.hero-sub, .hero-actions, .hero-meta .stat, .hero-badge', {
+      y: 24, opacity: 0, duration: 0.9, ease: 'power3.out', stagger: 0.08, delay: 0.55
+    });
+    gsap.from('.hero-bg img', { scale: 1.18, duration: 1.8, ease: 'power2.out' });
+  }
+
+  /* ---------------- Sticky nav background on scroll ---------------- */
+  const nav = document.querySelector('.nav');
+  if (nav) {
+    ScrollTrigger.create({
+      start: 'top -80',
+      end: 99999,
+      toggleClass: { targets: nav, className: 'is-scrolled' }
+    });
+  }
+
+  /* ---------------- Mobile nav toggle ---------------- */
+  const navToggle = document.querySelector('.nav-toggle');
+  const navLinks = document.querySelector('.nav-links');
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('open');
+      navToggle.classList.toggle('open');
+    });
+  }
+
+  /* ---------------- Generic scroll reveals ---------------- */
+  gsap.utils.toArray('.reveal').forEach((el, i) => {
+    gsap.to(el, {
+      opacity: 1, y: 0, duration: 0.9, ease: 'power3.out',
+      scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none reverse' }
+    });
+  });
+
+  /* Stagger children within .reveal-group */
+  gsap.utils.toArray('.reveal-group').forEach(group => {
+    const items = group.children;
+    gsap.set(items, { opacity: 0, y: 36 });
+    gsap.to(items, {
+      opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.12,
+      scrollTrigger: { trigger: group, start: 'top 85%' }
+    });
+  });
+
+  /* ---------------- Section eyebrow / headline reveal ---------------- */
+  gsap.utils.toArray('.section-head, .about-lead').forEach(el => {
+    gsap.from(el.children, {
+      opacity: 0, y: 30, duration: 0.9, ease: 'power3.out', stagger: 0.1,
+      scrollTrigger: { trigger: el, start: 'top 85%' }
+    });
+  });
+
+  /* ---------------- Marquee infinite loop ---------------- */
+  gsap.utils.toArray('.marquee-track').forEach(track => {
+    const clone = track.innerHTML;
+    track.innerHTML += clone; // duplicate content for seamless loop
+    const width = track.scrollWidth / 2;
+    gsap.to(track, { x: -width, duration: 22, ease: 'none', repeat: -1 });
+  });
+
+  /* ---------------- Counters (odometer style) ---------------- */
+  gsap.utils.toArray('[data-count]').forEach(el => {
+    const target = parseFloat(el.getAttribute('data-count'));
+    const suffix = el.getAttribute('data-suffix') || '';
+    const obj = { val: 0 };
+    ScrollTrigger.create({
+      trigger: el, start: 'top 90%', once: true,
+      onEnter: () => {
+        gsap.to(obj, {
+          val: target, duration: 1.8, ease: 'power2.out',
+          onUpdate: () => { el.textContent = (target % 1 === 0 ? Math.floor(obj.val) : obj.val.toFixed(1)) + suffix; }
+        });
+      }
+    });
+  });
+
+  /* ---------------- Parallax hero background (Webflow-style depth) ---------------- */
+  gsap.utils.toArray('.hero-bg img').forEach(img => {
+    gsap.to(img, {
+      yPercent: 18, ease: 'none',
+      scrollTrigger: { trigger: img.closest('.hero'), start: 'top top', end: 'bottom top', scrub: true }
+    });
+  });
+
+  /* ---------------- Parallax for section images ---------------- */
+  gsap.utils.toArray('[data-parallax]').forEach(img => {
+    gsap.to(img, {
+      yPercent: -14, ease: 'none',
+      scrollTrigger: { trigger: img, start: 'top bottom', end: 'bottom top', scrub: true }
+    });
+  });
+
+  /* ---------------- Card grid stagger-in ---------------- */
+  gsap.utils.toArray('.grid-3, .grid-4, .stat-row').forEach(grid => {
+    gsap.from(grid.children, {
+      opacity: 0, y: 50, duration: 0.8, ease: 'power3.out', stagger: 0.1,
+      scrollTrigger: { trigger: grid, start: 'top 88%' }
+    });
+  });
+
+  /* ---------------- 3D tilt on car cards / feature cards (mouse-follow) ---------------- */
+  document.querySelectorAll('.car-card, .feature-card').forEach(card => {
+    const strength = 10;
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      gsap.to(card, { rotateY: x * strength, rotateX: -y * strength, duration: 0.5, ease: 'power2.out', transformPerspective: 900 });
+    });
+    card.addEventListener('mouseleave', () => {
+      gsap.to(card, { rotateY: 0, rotateX: 0, duration: 0.6, ease: 'power3.out' });
+    });
+  });
+
+  /* ---------------- Speed divider reveal (skew wipe) ---------------- */
+  gsap.utils.toArray('.speed-divider').forEach(div => {
+    gsap.from(div, {
+      scaleY: 0, transformOrigin: 'top', duration: 1,
+      scrollTrigger: { trigger: div, start: 'top 95%' }
+    });
+  });
+
+  /* ---------------- Timeline / team card entrance (dealer/testi/blog cards are already animated as grid-3 children in the "Card grid stagger-in" block above — animating them again here caused conflicting opacity tweens that left some cards permanently invisible) ---------------- */
+  gsap.utils.toArray('.team-card').forEach(el => {
+    gsap.from(el, {
+      opacity: 0, y: 40, duration: 0.8, ease: 'power3.out',
+      scrollTrigger: { trigger: el, start: 'top 90%' }
+    });
+  });
+
+  /* ---------------- Timeline items ---------------- */
+  gsap.utils.toArray('.timeline-item').forEach(item => {
+    gsap.from(item, {
+      opacity: 0, x: -30, duration: 0.7, ease: 'power3.out',
+      scrollTrigger: { trigger: item, start: 'top 88%' }
+    });
+  });
+
+  /* ---------------- Dashboard bars grow-in ---------------- */
+  gsap.utils.toArray('.bars .bar').forEach(bar => {
+    const h = bar.style.height;
+    gsap.from(bar, {
+      height: 0, duration: 1, ease: 'power3.out',
+      scrollTrigger: { trigger: bar, start: 'top 95%' }
+    });
+  });
+
+  /* ---------------- Progress bars fill-in ---------------- */
+  gsap.utils.toArray('.progress-fill').forEach(fill => {
+    const w = fill.style.width;
+    gsap.fromTo(fill, { width: '0%' }, {
+      width: w, duration: 1.2, ease: 'power3.out',
+      scrollTrigger: { trigger: fill, start: 'top 95%' }
+    });
+  });
+
+  /* ---------------- Sidebar toggle (dashboard mobile) ---------------- */
+  const sidebarToggle = document.querySelector('.dash-toggle');
+  const sidebar = document.querySelector('.dash-sidebar');
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+  }
+
+  /* ---------------- Filter tag active state (Cars page) ---------------- */
+  document.querySelectorAll('.filter-tags button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  /* ---------------- Auth tab toggle ---------------- */
+  document.querySelectorAll('.auth-tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  /* ---------------- FAQ accordion ---------------- */
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const wasOpen = item.classList.contains('open');
+      item.parentElement.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+});
+
+(function(){
+    var form = document.getElementById('newsletterForm');
+    var overlay = document.getElementById('newsletterSuccessOverlay');
+    var closeBtn = document.getElementById('newsletterSuccessClose');
+    if (!form || !overlay) return;
+
+    var input = form.querySelector('input[name="newsletterEmail"]');
+    var errorMsg = document.getElementById('newsletterError');
+
+    function openModal(){ overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeModal(){ overlay.classList.remove('open'); document.body.style.overflow = ''; }
+    function showError(){ input.classList.add('field-invalid'); if (errorMsg) errorMsg.classList.add('show'); }
+    function clearError(){ input.classList.remove('field-invalid'); if (errorMsg) errorMsg.classList.remove('show'); }
+
+    input.addEventListener('input', clearError);
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var value = input.value.trim();
+      var isValid = value.length > 0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      if (!isValid) { showError(); input.focus(); return; }
+      clearError();
+      openModal();
+      form.reset();
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', function(e){ if (e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal(); });
+  })();
+
+</script>
+</body>
+</html>

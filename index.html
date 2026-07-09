@@ -129,16 +129,39 @@ p{ margin:0; color:var(--paper-dim); }
 .nav-toggle span{ position:absolute; left:0; width:100%; height:2px; background:var(--paper); transition:all .3s var(--ease); }
 .nav-toggle span:nth-child(1){ top:0; } .nav-toggle span:nth-child(2){ top:9px; } .nav-toggle span:nth-child(3){ top:18px; }
 
-/* ---------- Mobile nav close button ---------- */
-.nav-close{
-  display:none;
-  width:40px; height:40px;
-  align-items:center; justify-content:center;
-  background:none; border:1px solid var(--line); border-radius:50%;
-  color:var(--paper); font-size:1.15rem;
-  transition:border-color .3s, color .3s, transform .3s var(--ease);
+/* ---------- Hero ---------- */
+.hero{
+  min-height:78vh; position:relative; display:flex; align-items:flex-end;
+  padding:130px 0 70px; overflow:hidden;
 }
-.nav-close:hover{ border-color:var(--ignition); color:var(--ignition); transform:rotate(90deg); }
+.hero-bg{ position:absolute; inset:0; z-index:0; }
+.hero-bg img{ width:100%; height:100%; object-fit:cover; opacity:0.55; }
+.hero-bg::after{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(11,13,16,0.35) 0%, rgba(11,13,16,0.55) 55%, var(--ink) 100%);
+}
+.hero-grid{ position:absolute; inset:0; z-index:0; opacity:0.15;
+  background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:60px 60px; mask-image:linear-gradient(180deg, black, transparent 75%);
+}
+.hero-content{ position:relative; z-index:2; width:100%; }
+.hero-title{ overflow:hidden; }
+.hero-title .line{ display:block; overflow:hidden; }
+.hero-title .line span{ display:inline-block; will-change:transform; }
+.hero-sub{ max-width:520px; margin-top:26px; font-size:1.05rem; }
+.hero-actions{ display:flex; gap:16px; margin-top:40px; flex-wrap:wrap; }
+.hero-meta{
+  display:flex; gap:48px; margin-top:90px; padding-top:28px; border-top:1px solid var(--line); flex-wrap:wrap;
+}
+.hero-meta .stat b{ font-family:var(--f-display); font-size:2rem; display:block; color:var(--paper); }
+.hero-meta .stat span{ font-family:var(--f-mono); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--paper-dim); }
+.scroll-cue{
+  position:absolute; right:40px; bottom:40px; z-index:2; display:flex; flex-direction:column; align-items:center; gap:10px;
+  font-family:var(--f-mono); font-size:0.65rem; letter-spacing:0.2em; color:var(--paper-dim); text-transform:uppercase;
+}
+.scroll-cue .line{ width:1px; height:50px; background:var(--line); position:relative; overflow:hidden; }
+.scroll-cue .line::after{ content:''; position:absolute; top:-50%; left:0; width:100%; height:50%; background:var(--ignition); animation:scrollcue 1.8s ease-in-out infinite; }
+@keyframes scrollcue{ 0%{ top:-50%; } 100%{ top:100%; } }
 
 /* ---------- Marquee ---------- */
 .marquee-strip{ border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:26px 0; overflow:hidden; background:var(--ink-2); }
@@ -487,7 +510,6 @@ table tr:last-child td{ border-bottom:none; }
   .nav-links{ position:fixed; top:0; right:0; height:100vh; width:78%; background:var(--ink-2); flex-direction:column; justify-content:center; padding:40px; gap:28px; transform:translateX(100%); transition:transform .5s var(--ease); border-left:1px solid var(--line); z-index:1100; }
   .nav-links.open{ transform:translateX(0); }
   .nav-toggle{ display:block; }
-  .nav-close{ display:flex; position:absolute; top:24px; right:24px; }
 }
 @media (max-width: 760px){
   .grid-4, .grid-3, .grid-2{ grid-template-columns:1fr; }
@@ -521,7 +543,6 @@ table tr:last-child td{ border-bottom:none; }
 <header class="nav">
   <a href="index.html" class="nav-logo"><img src="./assets/stackly-removebg-preview.png" alt="" style="height: 60px; width: 120px;"></a>
   <nav class="nav-links">
-    <button class="nav-close" aria-label="Close menu"><i class="fa-solid fa-xmark"></i></button>
     <a href="index.html" class="active">Home</a>
     <a href="about.html">About</a>
     <a href="services.html">Services</a>
@@ -1110,37 +1131,10 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---------------- Mobile nav toggle ---------------- */
   const navToggle = document.querySelector('.nav-toggle');
   const navLinks = document.querySelector('.nav-links');
-  const navClose = document.querySelector('.nav-close');
-
-  function openNav() {
-    navLinks.classList.add('open');
-    navToggle.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeNav() {
-    navLinks.classList.remove('open');
-    navToggle.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
   if (navToggle && navLinks) {
     navToggle.addEventListener('click', () => {
-      if (navLinks.classList.contains('open')) {
-        closeNav();
-      } else {
-        openNav();
-      }
-    });
-  }
-
-  if (navClose && navLinks) {
-    navClose.addEventListener('click', closeNav);
-  }
-
-  // close nav when a nav link is tapped
-  if (navLinks) {
-    navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', closeNav);
+      navLinks.classList.toggle('open');
+      navToggle.classList.toggle('open');
     });
   }
 

@@ -145,9 +145,59 @@ p{ margin:0; color:var(--paper-dim); }
 @media (max-width: 480px){
   .auth-form-side{ padding:32px 24px; }
 }
+
+  .preloader{
+    position:fixed; inset:0; z-index:9999; background:var(--ink);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:26px; overflow:hidden; min-height:100vh;
+  }
+  .preloader::before{
+    content:''; position:absolute; inset:0; opacity:0.09;
+    background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:46px 46px; mask-image:radial-gradient(circle at 50% 50%, black, transparent 72%);
+  }
+
+  .gauge{ position:relative; width:176px; height:176px; }
+  .gauge svg{ width:100%; height:100%; transform:rotate(-90deg); overflow:visible; }
+  .gauge-track{ fill:none; stroke:var(--line); stroke-width:2.4; }
+  .gauge-fill{
+    fill:none; stroke:var(--ignition); stroke-width:2.4; stroke-linecap:round;
+    stroke-dasharray:540.35; stroke-dashoffset:540.35;
+    filter:drop-shadow(0 0 9px rgba(255,90,31,0.6));
+  }
+  .gauge-ticks{ position:absolute; inset:0; }
+  .gauge-ticks i{ position:absolute; left:50%; top:0; width:1px; height:8px; background:var(--line); transform-origin:0 88px; }
+  .gauge-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; }
+  .gauge-pct{ font-family:var(--f-display); font-weight:700; font-size:2.5rem; color:var(--paper); line-height:1; letter-spacing:0.01em; }
+  .gauge-pct sup{ position:relative; font-family:var(--f-mono); font-size:1.1rem; color:var(--ignition); top:-1.1em; margin-left:2px; }
+  .gauge-center .lbl{ font-family:var(--f-mono); font-size:0.6rem; letter-spacing:0.24em; text-transform:uppercase; color:var(--paper-dim); }
+
+  .preloader-word{ font-family:var(--f-display); font-size:1.15rem; letter-spacing:0.32em; text-transform:uppercase; color:var(--paper); display:flex; gap:8px; }
+  .preloader-word span{ color:var(--ignition); }
+  .preloader-tag{ font-family:var(--f-mono); font-size:0.62rem; letter-spacing:0.22em; text-transform:uppercase; color:var(--paper-dim); }
+  .preloader-tag::after{ content:''; display:inline-block; width:6px; height:11px; background:var(--ignition); margin-left:8px; vertical-align:-2px; animation:cursorblink 0.9s step-end infinite; }
+  @keyframes cursorblink{ 50%{ opacity:0; } }
+
 </style>
 </head>
 <body>
+
+<div class="preloader">
+  <div class="gauge">
+    <svg viewBox="0 0 200 200">
+      <circle class="gauge-track" cx="100" cy="100" r="86"></circle>
+      <circle class="gauge-fill" cx="100" cy="100" r="86"></circle>
+    </svg>
+    <div class="gauge-ticks" id="gaugeTicks"></div>
+    <div class="gauge-center">
+      <span class="gauge-pct"><span id="gaugeNum">0</span><sup>%</sup></span>
+      <span class="lbl">Starting Engine</span>
+    </div>
+  </div>
+  <div class="preloader-word">STACKLY<span>MOTORS</span></div>
+  <div class="preloader-tag mono">Ignition Sequence</div>
+</div>
+
 
 <div class="auth-wrap">
   <div class="auth-visual">
@@ -316,7 +366,48 @@ p{ margin:0; color:var(--paper-dim); }
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
+
+document.addEventListener('DOMContentLoaded', () => {
+  const preloader = document.querySelector('.preloader');
+  if (!preloader) return;
+
+  // build tick marks around the gauge
+  const ticksWrap = document.getElementById('gaugeTicks');
+  if (ticksWrap) {
+    const total = 28;
+    for (let i = 0; i < total; i++) {
+      const t = document.createElement('i');
+      const angle = -132 + (264 * i) / (total - 1);
+      t.style.transform = `rotate(${angle}deg)`;
+      ticksWrap.appendChild(t);
+    }
+  }
+
+  const fill = preloader.querySelector('.gauge-fill');
+  const numEl = document.getElementById('gaugeNum');
+  const circumference = 540.35;
+  const counter = { val: 0 };
+
+  const tl = gsap.timeline({
+    onComplete: () => {
+      gsap.to(preloader, {
+        yPercent: -100, duration: 0.9, ease: 'power4.inOut', delay: 0.15,
+        onComplete: () => preloader.remove()
+      });
+    }
+  });
+
+  tl.to(counter, {
+    val: 100, duration: 1.6, ease: 'power2.inOut',
+    onUpdate: () => {
+      numEl.textContent = Math.round(counter.val);
+      fill.style.strokeDashoffset = circumference * (1 - counter.val / 100);
+    }
+  });
+});
+
 (function(){
 
   /* ---------- Element refs ---------- */
@@ -471,6 +562,12 @@ p{ margin:0; color:var(--paper-dim); }
 
   /* ---------- Validation helpers ---------- */
   function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+  function deriveNameFromEmail(email){
+    const local = email.split('@')[0] || '';
+    const cleaned = local.replace(/[._-]+/g, ' ').replace(/\d+/g, ' ').trim();
+    if (!cleaned) return currentRole === 'admin' ? 'Admin' : 'Guest';
+    return cleaned.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
   function setFieldError(input, errEl, show){ input.classList.toggle('error', show); errEl.classList.toggle('show', show); }
   function clearSigninAlert(){ signinAlert.classList.remove('show'); }
   function clearSignupAlert(){ signupAlert.classList.remove('show'); }
@@ -508,28 +605,26 @@ p{ margin:0; color:var(--paper-dim); }
       submitBtn.classList.remove('loading');
       submitBtn.disabled = false;
 
+      // Any correctly-formatted email + 6+ char password is accepted.
+      // Reuse a saved display name for this email if one exists (from the
+      // demo accounts or a previous sign-up); otherwise derive a friendly
+      // display name straight from the email address.
       const demo = DEMO_ACCOUNTS[currentRole];
-      let matchedName = null;
+      const stored = getStoredAccounts().find(a => a.role === currentRole && a.email === emailVal);
+      const matchedName = (emailVal === demo.email)
+        ? demo.name
+        : (stored ? stored.name : deriveNameFromEmail(emailVal));
 
-      if (emailVal === demo.email && pwVal === demo.password) {
-        matchedName = demo.name;
-      } else {
-        const stored = getStoredAccounts().find(a => a.role === currentRole && a.email === emailVal && a.password === pwVal);
-        if (stored) matchedName = stored.name;
+      if (document.getElementById('remember').checked) {
+        localStorage.setItem('stackly_remember_email', emailVal);
       }
+      const nameKey = currentRole === 'admin' ? 'stackly_admin_name' : 'stackly_user_name';
+      const emailKey = currentRole === 'admin' ? 'stackly_admin_email' : 'stackly_user_email';
+      localStorage.setItem(nameKey, matchedName);
+      localStorage.setItem(emailKey, emailVal);
 
-      if (matchedName) {
-        if (document.getElementById('remember').checked) {
-          localStorage.setItem('stackly_remember_email', emailVal);
-        }
-        const key = currentRole === 'admin' ? 'stackly_admin_name' : 'stackly_user_name';
-        localStorage.setItem(key, matchedName);
-
-        const dest = currentRole === 'admin' ? 'admin-dashboard.html' : 'user-dashboard.html';
-        window.location.href = dest + '?name=' + encodeURIComponent(matchedName);
-      } else {
-        showSigninAlert('Invalid email or password for this account type.');
-      }
+      const dest = currentRole === 'admin' ? 'admin-dashboard.html' : 'user-dashboard.html';
+      window.location.href = dest + '?name=' + encodeURIComponent(matchedName) + '&email=' + encodeURIComponent(emailVal);
     }, 900);
   });
 

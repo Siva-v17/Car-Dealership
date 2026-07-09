@@ -81,7 +81,7 @@
   }
   .form-error-banner.show{ display:flex; }
 
-  /* ---------- Success modal ---------- */
+  /* ---------- Success modal (shared by contact form + newsletter form) ---------- */
   .success-overlay{
     position:fixed; inset:0; z-index:5000;
     background:rgba(11,13,16,0.72);
@@ -96,7 +96,7 @@
     background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius);
     max-width:420px; width:100%; padding:40px 32px; text-align:center;
     transform:translateY(16px) scale(0.97); opacity:0;
-    transition:transform .35s cubic-bezier(.22,1,.36,1), opacity .35s ease;
+    transition:transform .35s var(--ease, cubic-bezier(.22,1,.36,1)), opacity .35s ease;
   }
   .success-overlay.open .success-modal{ transform:translateY(0) scale(1); opacity:1; }
   .success-modal .ic{
@@ -107,61 +107,84 @@
   .success-modal h3{ font-size:1.3rem; margin-bottom:12px; }
   .success-modal p{ font-size:0.92rem; max-width:320px; margin:0 auto; }
   .success-modal .btn{ margin-top:26px; }
-  .footer-newsletter{
-  background:var(--ink-3); border:1px solid var(--line); border-radius:var(--radius);
-  padding:28px; display:flex; flex-direction:column; gap:16px;
-}
-.footer-newsletter h4{ margin:0; }
-.footer-newsletter p{ font-size:0.85rem; }
-.newsletter-form{ display:flex; flex-direction:column; gap:10px; }
-.newsletter-form .nl-field{ width:100%; }
-.newsletter-form input{
-  width:100%; background:var(--ink); border:1px solid var(--line); border-radius:4px; padding:13px 16px; color:var(--paper);
-  font-size:0.9rem; transition:border-color .3s; box-sizing:border-box;
-}
-.newsletter-form input:focus{ outline:none; border-color:var(--ignition); }
-.newsletter-form input.field-invalid{ border-color:var(--danger); }
-.newsletter-form .field-error{
-  display:none; color:var(--danger); font-family:var(--f-mono); font-size:0.68rem;
-  letter-spacing:0.02em; margin-top:6px;
-}
-.newsletter-form .field-error.show{ display:block; }
-@media (min-width: 560px){
-  .newsletter-form{ flex-direction:row; align-items:flex-start; }
-  .newsletter-form .nl-field{ flex:1; }
-  .newsletter-form button{ flex-shrink:0; width:auto; }
-}
 
-/* ---------- Newsletter success modal ---------- */
-.success-overlay{
-  position:fixed; inset:0; z-index:5000;
-  background:rgba(11,13,16,0.72);
-  backdrop-filter:blur(6px);
-  display:flex; align-items:center; justify-content:center;
-  padding:24px;
-  opacity:0; pointer-events:none;
-  transition:opacity .3s ease;
-}
-.success-overlay.open{ opacity:1; pointer-events:auto; }
-.success-modal{
-  background:var(--ink-2); border:1px solid var(--line); border-radius:var(--radius);
-  max-width:420px; width:100%; padding:40px 32px; text-align:center;
-  transform:translateY(16px) scale(0.97); opacity:0;
-  transition:transform .35s var(--ease), opacity .35s ease;
-}
-.success-overlay.open .success-modal{ transform:translateY(0) scale(1); opacity:1; }
-.success-modal .ic{
-  width:64px; height:64px; border-radius:50%; margin:0 auto 20px;
-  display:flex; align-items:center; justify-content:center;
-  background:rgba(61,220,132,0.12); color:var(--ok); font-size:1.6rem;
-}
-.success-modal h3{ font-size:1.3rem; margin-bottom:12px; }
-.success-modal p{ font-size:0.92rem; max-width:320px; margin:0 auto; }
-.success-modal .btn{ margin-top:26px; }
+  /* ---------- Footer newsletter ---------- */
+  .footer-newsletter{
+    background:var(--ink-3); border:1px solid var(--line); border-radius:var(--radius);
+    padding:28px; display:flex; flex-direction:column; gap:16px;
+  }
+  .footer-newsletter h4{ margin:0; }
+  .footer-newsletter p{ font-size:0.85rem; }
+  .newsletter-form{ display:flex; flex-direction:column; gap:10px; }
+  .newsletter-form .nl-field{ width:100%; }
+  .newsletter-form input{
+    width:100%; background:var(--ink); border:1px solid var(--line); border-radius:4px; padding:13px 16px; color:var(--paper);
+    font-size:0.9rem; transition:border-color .3s; box-sizing:border-box;
+  }
+  .newsletter-form input:focus{ outline:none; border-color:var(--ignition); }
+  .newsletter-form input.field-invalid{ border-color:var(--danger); }
+  .newsletter-form .field-error{
+    display:none; color:var(--danger); font-family:var(--f-mono); font-size:0.68rem;
+    letter-spacing:0.02em; margin-top:6px;
+  }
+  .newsletter-form .field-error.show{ display:block; }
+  @media (min-width: 560px){
+    .newsletter-form{ flex-direction:row; align-items:flex-start; }
+    .newsletter-form .nl-field{ flex:1; }
+    .newsletter-form button{ flex-shrink:0; width:auto; }
+  }
+  .preloader{
+    position:fixed; inset:0; z-index:9999; background:var(--ink);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:26px; overflow:hidden; min-height:100vh;
+  }
+  .preloader::before{
+    content:''; position:absolute; inset:0; opacity:0.09;
+    background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:46px 46px; mask-image:radial-gradient(circle at 50% 50%, black, transparent 72%);
+  }
+
+  .gauge{ position:relative; width:176px; height:176px; }
+  .gauge svg{ width:100%; height:100%; transform:rotate(-90deg); overflow:visible; }
+  .gauge-track{ fill:none; stroke:var(--line); stroke-width:2.4; }
+  .gauge-fill{
+    fill:none; stroke:var(--ignition); stroke-width:2.4; stroke-linecap:round;
+    stroke-dasharray:540.35; stroke-dashoffset:540.35;
+    filter:drop-shadow(0 0 9px rgba(255,90,31,0.6));
+  }
+  .gauge-ticks{ position:absolute; inset:0; }
+  .gauge-ticks i{ position:absolute; left:50%; top:0; width:1px; height:8px; background:var(--line); transform-origin:0 88px; }
+  .gauge-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; }
+  .gauge-pct{ font-family:var(--f-display); font-weight:700; font-size:2.5rem; color:var(--paper); line-height:1; letter-spacing:0.01em; }
+  .gauge-pct sup{ position:relative; font-family:var(--f-mono); font-size:1.1rem; color:var(--ignition); top:-1.1em; margin-left:2px; }
+  .gauge-center .lbl{ font-family:var(--f-mono); font-size:0.6rem; letter-spacing:0.24em; text-transform:uppercase; color:var(--paper-dim); }
+
+  .preloader-word{ font-family:var(--f-display); font-size:1.15rem; letter-spacing:0.32em; text-transform:uppercase; color:var(--paper); display:flex; gap:8px; }
+  .preloader-word span{ color:var(--ignition); }
+  .preloader-tag{ font-family:var(--f-mono); font-size:0.62rem; letter-spacing:0.22em; text-transform:uppercase; color:var(--paper-dim); }
+  .preloader-tag::after{ content:''; display:inline-block; width:6px; height:11px; background:var(--ignition); margin-left:8px; vertical-align:-2px; animation:cursorblink 0.9s step-end infinite; }
+  @keyframes cursorblink{ 50%{ opacity:0; } }
+
 </style>
 </head>
 <body>
-<div class="preloader"><span class="word">STACKLY MOTORS</span><div class="bar"><i></i></div></div>
+<!-- <div class="preloader"><span class="word">STACKLY MOTORS</span><div class="bar"><i></i></div></div> -->
+
+<div class="preloader">
+  <div class="gauge">
+    <svg viewBox="0 0 200 200">
+      <circle class="gauge-track" cx="100" cy="100" r="86"></circle>
+      <circle class="gauge-fill" cx="100" cy="100" r="86"></circle>
+    </svg>
+    <div class="gauge-ticks" id="gaugeTicks"></div>
+    <div class="gauge-center">
+      <span class="gauge-pct"><span id="gaugeNum">0</span><sup>%</sup></span>
+      <span class="lbl">Starting Engine</span>
+    </div>
+  </div>
+  <div class="preloader-word">STACKLY<span>MOTORS</span></div>
+  <div class="preloader-tag mono">Ignition Sequence</div>
+</div>
 
 <header class="nav">
   <a href="index.html" class="nav-logo"><img src="./assets/stackly-removebg-preview.png" alt="" style="height: 60px; width: 120px;"></a>
@@ -296,10 +319,29 @@
         <a href="index.html" class="nav-logo"><img src="./assets/stackly-removebg-preview.png" alt="" style="height: 60px; width: 120px;"></a>
         <p>Premium new, certified pre-owned and electric vehicles from a curated dealer network across India.</p>
         <div class="social-row" style="margin-top:24px;">
-          <a href="#"><i class="fa-brands fa-instagram"></i></a>
-          <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
-          <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
-          <a href="#"><i class="fa-brands fa-youtube"></i></a>
+          <a href="error.html" aria-label="Instagram">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+              <path d="M12 2c-2.72 0-3.06.01-4.12.06-1.06.05-1.79.22-2.43.47-.66.26-1.22.6-1.77 1.16-.56.55-.9 1.11-1.16 1.77-.25.64-.42 1.37-.47 2.43C2.01 8.94 2 9.28 2 12s.01 3.06.06 4.12c.05 1.06.22 1.79.47 2.43.26.66.6 1.22 1.16 1.77.55.56 1.11.9 1.77 1.16.64.25 1.37.42 2.43.47C8.94 21.99 9.28 22 12 22s3.06-.01 4.12-.06c1.06-.05 1.79-.22 2.43-.47.66-.26 1.22-.6 1.77-1.16.56-.55.9-1.11 1.16-1.77.25-.64.42-1.37.47-2.43.05-1.06.06-1.4.06-4.12s-.01-3.06-.06-4.12c-.05-1.06-.22-1.79-.47-2.43-.26-.66-.6-1.22-1.16-1.77-.55-.56-1.11-.9-1.77-1.16-.64-.25-1.37-.42-2.43-.47C15.06 2.01 14.72 2 12 2zm0 1.8c2.67 0 2.99.01 4.04.06.98.04 1.5.21 1.85.34.47.18.8.4 1.15.75.35.35.57.68.75 1.15.13.36.3.87.34 1.85.05 1.05.06 1.37.06 4.04s-.01 2.99-.06 4.04c-.04.98-.21 1.5-.34 1.85-.18.47-.4.8-.75 1.15-.35.35-.68.57-1.15.75-.36.13-.87.3-1.85.34-1.05.05-1.37.06-4.04.06s-2.99-.01-4.04-.06c-.98-.04-1.5-.21-1.85-.34-.47-.18-.8-.4-1.15-.75-.35-.35-.57-.68-.75-1.15-.13-.36-.3-.87-.34-1.85C3.81 14.99 3.8 14.67 3.8 12s.01-2.99.06-4.04c.04-.98.21-1.5.34-1.85.18-.47.4-.8.75-1.15.35-.35.68-.57 1.15-.75.36-.13.87-.3 1.85-.34C9.01 3.81 9.33 3.8 12 3.8zm0 3.05a5.15 5.15 0 1 0 0 10.3 5.15 5.15 0 0 0 0-10.3zm0 8.5a3.35 3.35 0 1 1 0-6.7 3.35 3.35 0 0 1 0 6.7zm5.35-8.7a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0z"/>
+            </svg>
+          </a>
+
+          <a href="error.html" aria-label="Facebook">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+              <path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.88h2.78l-.44 2.91h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94z"/>
+            </svg>
+          </a>
+
+          <a href="error.html" aria-label="X (Twitter)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+              <path d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.66l-5.22-6.83-5.97 6.83H1.66l7.73-8.84L1.25 2.25h6.83l4.72 6.24 5.44-6.24zm-1.16 17.52h1.83L7.02 4.13H5.06l12.02 15.64z"/>
+            </svg>
+          </a>
+
+          <a href="error.html" aria-label="YouTube">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+              <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14C4.5 20.5 12 20.5 12 20.5s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81zM9.6 15.6V8.4l6.4 3.6-6.4 3.6z"/>
+            </svg>
+          </a>
         </div>
       </div>
       <div><h4>Explore</h4><ul>
@@ -310,15 +352,15 @@
       </ul></div>
       <div><h4>Company</h4><ul>
         <li><a href="about.html">About Us</a></li>
-        <li><a href="contact.html">Careers</a></li>
-        <li><a href="contact.html">Press</a></li>
+        <li><a href="cars.html">Cars</a></li>
+        <li><a href="dealers.html">Dealer Network</a></li>
         <li><a href="contact.html">Contact</a></li>
       </ul></div>
-      <div><h4>Account</h4><ul>
-        <li><a href="login.html">Sign In</a></li>
-        <li><a href="user-dashboard.html">My Dashboard</a></li>
-        <li><a href="admin-dashboard.html">Admin Portal</a></li>
-        <li><a href="contact.html">Support</a></li>
+      <div><h4>Conditions</h4><ul>
+        <li><a href="error.html">Privacy Policy</a></li>
+        <li><a href="error.html">Terms of Service</a></li>
+        <!-- <li><a href="admin-dashboard.html">Admin Portal</a></li>
+        <li><a href="contact.html">Support</a></li> -->
       </ul></div>
       <div>
         <div class="footer-newsletter">
@@ -362,7 +404,6 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="script.js"></script>
 <script>
   (function(){
     var form = document.getElementById('contactForm');
@@ -501,6 +542,46 @@
     overlay.addEventListener('click', function(e){ if (e.target === overlay) closeModal(); });
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal(); });
   })();
+
+  document.addEventListener('DOMContentLoaded', () => {
+  const preloader = document.querySelector('.preloader');
+  if (!preloader) return;
+
+  // build tick marks around the gauge
+  const ticksWrap = document.getElementById('gaugeTicks');
+  if (ticksWrap) {
+    const total = 28;
+    for (let i = 0; i < total; i++) {
+      const t = document.createElement('i');
+      const angle = -132 + (264 * i) / (total - 1);
+      t.style.transform = `rotate(${angle}deg)`;
+      ticksWrap.appendChild(t);
+    }
+  }
+
+  const fill = preloader.querySelector('.gauge-fill');
+  const numEl = document.getElementById('gaugeNum');
+  const circumference = 540.35;
+  const counter = { val: 0 };
+
+  const tl = gsap.timeline({
+    onComplete: () => {
+      gsap.to(preloader, {
+        yPercent: -100, duration: 0.9, ease: 'power4.inOut', delay: 0.15,
+        onComplete: () => preloader.remove()
+        // hook your page-intro animation here, e.g. runIntro();
+      });
+    }
+  });
+
+  tl.to(counter, {
+    val: 100, duration: 1.6, ease: 'power2.inOut',
+    onUpdate: () => {
+      numEl.textContent = Math.round(counter.val);
+      fill.style.strokeDashoffset = circumference * (1 - counter.val / 100);
+    }
+  });
+});
 </script>
 </body>
 </html>
